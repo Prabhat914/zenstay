@@ -25,6 +25,7 @@ function Nav() {
     let [cate,setCate]= useState()
     let {listingData,setNewListData,searchData,handleSearch,handleViewCard}=useContext(listingDataContext)
     let [input,setInput]=useState("")
+    const hasValidUser = userData && typeof userData === "object"
     const handleLogOut = async () => {
         try {
             let result = await axios.post( serverUrl + "/api/auth/logout", {withCredentials:true})
@@ -77,8 +78,8 @@ function Nav() {
                     <span className='text-[18px] cursor-pointer rounded-[50px] hover:bg-[#ded9d9] px-[8px] py-[5px] hidden md:block' onClick={()=>navigate("/listingpage1")}>List your home</span>
                     <button className='px-[20px] py-[10px] flex items-center justify-center gap-[5px] border-[1px] border-[#8d8c8c] rounded-[50px] hover:shadow-lg' onClick={()=>setShowpopup(prev =>!prev)}>
                         <span><GiHamburgerMenu className='w-[20px] h-[20px]' /></span>
-                        {userData == null && <span><CgProfile className='w-[23px] h-[23px]' /></span>}
-                        {userData != null && <span className='w-[30px] h-[30px] bg-[#080808] text-[white] rounded-full flex items-center justify-center'>{userData?.name.slice(0,1)}</span>}
+                        {!hasValidUser && <span><CgProfile className='w-[23px] h-[23px]' /></span>}
+                        {hasValidUser && <span className='w-[30px] h-[30px] bg-[#080808] text-[white] rounded-full flex items-center justify-center'>{userData?.name?.slice(0,1) || "U"}</span>}
                     </button>
                     {showpopup && <div className='w-[220px] h-[250px] absolute bg-slate-50 top-[110%] right-[3%] border-[1px] border-[#aaa9a9] z-10 rounded-lg md:right-[10%]'>
                         <ul className='w-[100%] h-[100%] text-[17px] flex items-start justify-around flex-col py-[10px]'>

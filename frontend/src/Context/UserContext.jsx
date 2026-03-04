@@ -11,8 +11,14 @@ function UserContext({children}) {
      const getCurrentUser = async () => {
 
         try {
+            if (!serverUrl) {
+                setUserData(null)
+                return
+            }
             let result = await axios.get(serverUrl + "/api/user/currentuser",{withCredentials:true})
-            setUserData(result.data)
+            const data = result.data
+            const isValidUserObject = data && typeof data === "object" && !Array.isArray(data) && data._id
+            setUserData(isValidUserObject ? data : null)
         } catch (error) {
             setUserData(null)
             console.log(error)
