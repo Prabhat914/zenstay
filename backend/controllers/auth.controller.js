@@ -3,6 +3,16 @@ import User from "../model/user.model.js"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
 
+const buildCookieOptions = () => {
+    const isProduction = process.env.NODE_ENVIRONMENT === "production"
+    return {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    }
+}
+
 export const sighUp=async (req,res) => {
     try {
         let {name,email,password,location,country,mapUrl} = req.body
@@ -20,14 +30,7 @@ export const sighUp=async (req,res) => {
             mapUrl: String(mapUrl || "").trim()
         })
         let token = await genToken(user._id)
-        res.cookie("token",token,{
-            httpOnly:true,
-            secure: process.env.NODE_ENVIRONMENT === "production",
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-
-
-        })
+        res.cookie("token",token,buildCookieOptions())
         return res.status(201).json(user)
 
     } catch (error) {
@@ -47,14 +50,7 @@ export const login = async (req,res) => {
             return res.status(400).json({message:"incorrect Password"})
         }
         let token = await genToken(user._id)
-        res.cookie("token",token,{
-            httpOnly:true,
-            secure: process.env.NODE_ENVIRONMENT === "production",
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-
-
-        })
+        res.cookie("token",token,buildCookieOptions())
         return res.status(200).json(user)
         
     } catch (error) {
@@ -64,7 +60,7 @@ export const login = async (req,res) => {
 }
 export const logOut = async (req,res) => {
     try {
-        res.clearCookie("token")
+        res.clearCookie("token", buildCookieOptions())
         return res.status(200).json({message:"Logout Successfully"})
     } catch (error) {
         return res.status(500).json({message:`logout error ${error}`})
