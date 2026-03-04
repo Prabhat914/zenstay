@@ -19,10 +19,21 @@ let port = process.env.PORT || 6000
 let app = express()
 app.use(express.json())
 app.use(cookieParser())
+const allowedOrigins = [
+    process.env.CLIENT_URL,
+    ...(process.env.CORS_ORIGINS || "").split(",")
+].map((origin) => String(origin || "").trim()).filter(Boolean)
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests from any local Vite dev server port.
-        if (!origin || /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
+        // Server-side requests may have no origin.
+        if (!origin) {
+            return callback(null, true);
+        }
+        // Allow local Vite dev and configured production frontends.
+        if (
+            /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin) ||
+            allowedOrigins.includes(origin)
+        ) {
             return callback(null, true);
         }
         return callback(new Error("Not allowed by CORS"));
