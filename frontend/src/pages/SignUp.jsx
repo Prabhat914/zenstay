@@ -27,9 +27,13 @@ function SignUp() {
 
 
     const handleSignUP = async (e) => {
-      setLoading(true)
+        e.preventDefault()
+        if (!serverUrl) {
+          toast.error("API URL is missing. Set VITE_API_URL in deployment environment.")
+          return
+        }
+        setLoading(true)
         try {
-            e.preventDefault()
             let result = await axios.post(serverUrl + "/api/auth/signup",{
                 name,
                 email,
@@ -47,7 +51,8 @@ function SignUp() {
         } catch (error) {
           setLoading(false)
             console.log(error)
-            toast.error("Somethings went wrong")
+            const message = error?.response?.data?.message || error?.message || "Something went wrong"
+            toast.error(message)
         }
         
     }
