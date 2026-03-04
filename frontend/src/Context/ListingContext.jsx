@@ -348,6 +348,15 @@ function ListingContext({children}) {
         try {
             let result = await axios.get( serverUrl + "/api/listing/get",{withCredentials:true, timeout: 6000})
             const items = Array.isArray(result.data) ? result.data : []
+            if (items.length === 0) {
+                setListingData(demoListings)
+                setNewListData(demoListings)
+                if (!didShowFallbackToast.current) {
+                    toast.info("No backend listings found yet, showing demo cards.")
+                    didShowFallbackToast.current = true
+                }
+                return
+            }
             setListingData(items)
             setNewListData(items)
             didShowFallbackToast.current = false
