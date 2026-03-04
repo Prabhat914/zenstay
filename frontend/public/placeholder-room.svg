@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <rect width="1200" height="800" fill="#e5e7eb"/>
+  <rect x="220" y="260" width="760" height="320" rx="24" fill="#d1d5db"/>
+  <rect x="280" y="330" width="230" height="160" rx="12" fill="#9ca3af"/>
+  <rect x="540" y="330" width="380" height="160" rx="12" fill="#f3f4f6"/>
+  <circle cx="1010" cy="120" r="48" fill="#fca5a5"/>
+  <text x="600" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" fill="#4b5563">Zenstay Room</text>
+</svg>
