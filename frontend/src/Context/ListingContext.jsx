@@ -28,6 +28,7 @@ function ListingContext({children}) {
     let [newListData,setNewListData]=useState([])
     let [cardDetails,setCardDetails]=useState(null)
     let [searchData,setSearchData]=useState([])
+    let [listingsLoading,setListingsLoading]=useState(true)
     const didShowFallbackToast = useRef(false)
     const fallbackImage = logoImage
     const demoListings = [
@@ -464,6 +465,7 @@ function ListingContext({children}) {
      }
 
      const getListing = async () => {
+        setListingsLoading(true)
         try {
             let result = await axios.get( serverUrl + "/api/listing/get",{withCredentials:true, timeout: 6000})
             const items = Array.isArray(result.data) ? result.data : []
@@ -474,12 +476,14 @@ function ListingContext({children}) {
                     toast.info("No backend listings found yet, showing demo cards.")
                     didShowFallbackToast.current = true
                 }
+                setListingsLoading(false)
                 return
             }
             const mergedItems = mergeListings(items)
             setListingData(mergedItems)
             setNewListData(mergedItems)
             didShowFallbackToast.current = false
+            setListingsLoading(false)
 
         } catch (error) {
             console.log(error)
@@ -489,6 +493,7 @@ function ListingContext({children}) {
                 toast.error("Backend listings unavailable, showing demo cards.")
                 didShowFallbackToast.current = true
             }
+            setListingsLoading(false)
         }
         
      }
@@ -517,6 +522,7 @@ function ListingContext({children}) {
         listingData,setListingData,
         getListing,
         newListData,setNewListData,
+        listingsLoading,setListingsLoading,
         handleViewCard,
         cardDetails,setCardDetails,
         updating,setUpdating,
