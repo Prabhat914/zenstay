@@ -25,10 +25,10 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    resetPasswordToken:{
+    resetPasswordOtp:{
         type:String
     },
-    resetPasswordExpire:{
+    resetPasswordOtpExpire:{
         type:Date
     },
     listing:[{

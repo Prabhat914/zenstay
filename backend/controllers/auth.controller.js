@@ -12,6 +12,14 @@ const buildCookieOptions = () => {
         maxAge: 7 * 24 * 60 * 60 * 1000
     }
 }
+const serializeUser = (userDoc) => {
+    const obj = typeof userDoc?.toObject === "function" ? userDoc.toObject() : { ...(userDoc || {}) }
+    delete obj.password
+    delete obj.resetPasswordOtp
+    delete obj.resetPasswordOtpExpire
+    return obj
+}
+const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000))
 
 export const sighUp=async (req,res) => {
     try {
@@ -31,7 +39,8 @@ export const sighUp=async (req,res) => {
         })
         let token = await genToken(user._id)
         res.cookie("token",token,buildCookieOptions())
-        return res.status(201).json(user)
+        const safeUser = serializeUser(user)
+        return res.status(201).json({ ...safeUser, token })
 
     } catch (error) {
         return res.status(500).json({message:`sighup error ${error}`})
@@ -51,7 +60,8 @@ export const login = async (req,res) => {
         }
         let token = await genToken(user._id)
         res.cookie("token",token,buildCookieOptions())
-        return res.status(200).json(user)
+        const safeUser = serializeUser(user)
+        return res.status(200).json({ ...safeUser, token })
         
     } catch (error) {
         return res.status(500).json({message:`login error ${error}`})
@@ -77,23 +87,21 @@ export const forgotPassword = async (req,res) => {
         const user = await User.findOne({ email })
         if (!user) {
             return res.status(200).json({
-                message: "If this email exists, reset instructions have been generated."
+                message: "If this email exists, an OTP has been generated."
             })
         }
 
-        const resetToken = crypto.randomBytes(32).toString("hex")
-        const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex")
+        const otp = generateOtp()
+        const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex")
 
-        user.resetPasswordToken = hashedToken
-        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000
+        user.resetPasswordOtp = hashedOtp
+        user.resetPasswordOtpExpire = Date.now() + 10 * 60 * 1000
         await user.save()
 
-        const clientUrl = process.env.CLIENT_URL || "http://localhost:5173"
-        const resetUrl = `${clientUrl}/reset-password/${resetToken}`
-
-        const response = { message: "Password reset link generated." }
-        if (process.env.NODE_ENVIRONMENT !== "production") {
-            response.resetUrl = resetUrl
+        const response = {
+            message: "OTP generated successfully.",
+            email: user.email,
+            otp
         }
 
         return res.status(200).json(response)
@@ -104,8 +112,11 @@ export const forgotPassword = async (req,res) => {
 
 export const resetPassword = async (req,res) => {
     try {
-        const { token } = req.params
-        const { password, confirmPassword } = req.body
+        const { email, otp, password, confirmPassword } = req.body
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP are required" })
+        }
 
         if (!password || !confirmPassword) {
             return res.status(400).json({ message: "Password and confirm password are required" })
@@ -117,20 +128,21 @@ export const resetPassword = async (req,res) => {
             return res.status(400).json({ message: "Password must be at least 6 characters" })
         }
 
-        const hashedToken = crypto.createHash("sha256").update(token).digest("hex")
+        const hashedOtp = crypto.createHash("sha256").update(String(otp)).digest("hex")
         const user = await User.findOne({
-            resetPasswordToken: hashedToken,
-            resetPasswordExpire: { $gt: Date.now() }
+            email,
+            resetPasswordOtp: hashedOtp,
+            resetPasswordOtpExpire: { $gt: Date.now() }
         })
 
         if (!user) {
-            return res.status(400).json({ message: "Reset token is invalid or expired" })
+            return res.status(400).json({ message: "OTP is invalid or expired" })
         }
 
         const hashPassword = await bcrypt.hash(password,10)
         user.password = hashPassword
-        user.resetPasswordToken = undefined
-        user.resetPasswordExpire = undefined
+        user.resetPasswordOtp = undefined
+        user.resetPasswordOtpExpire = undefined
         await user.save()
 
         return res.status(200).json({ message: "Password reset successful" })

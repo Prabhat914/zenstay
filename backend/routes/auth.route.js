@@ -7,5 +7,5 @@ authRouter.post("/signup",sighUp)
 authRouter.post("/login",login)
 authRouter.post("/logout",logOut)
 authRouter.post("/forgot-password",forgotPassword)
-authRouter.post("/reset-password/:token",resetPassword)
+authRouter.post("/reset-password",resetPassword)
 export default authRouter
