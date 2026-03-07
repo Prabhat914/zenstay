@@ -88,7 +88,7 @@ export const forgotPassword = async (req,res) => {
         const user = await User.findOne({ email })
         if (!user) {
             return res.status(200).json({
-                message: "If this email exists, an OTP has been generated."
+                message: "If this email exists, an OTP has been sent."
             })
         }
 
@@ -118,6 +118,31 @@ export const forgotPassword = async (req,res) => {
         return res.status(200).json(response)
     } catch (error) {
         return res.status(500).json({message:`forgot password error ${error}`})
+    }
+}
+
+export const verifyResetOtp = async (req,res) => {
+    try {
+        const { email, otp } = req.body
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP are required" })
+        }
+
+        const hashedOtp = crypto.createHash("sha256").update(String(otp)).digest("hex")
+        const user = await User.findOne({
+            email,
+            resetPasswordOtp: hashedOtp,
+            resetPasswordOtpExpire: { $gt: Date.now() }
+        })
+
+        if (!user) {
+            return res.status(400).json({ message: "OTP is invalid or expired" })
+        }
+
+        return res.status(200).json({ message: "OTP verified successfully" })
+    } catch (error) {
+        return res.status(500).json({message:`verify otp error ${error}`})
     }
 }
 

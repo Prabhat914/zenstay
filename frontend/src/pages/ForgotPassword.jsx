@@ -38,7 +38,7 @@ function ForgotPassword() {
                     <label htmlFor="email" className='text-[20px]'>Email</label>
                     <input type="email" id='email' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px]' required onChange={(e)=>setEmail(e.target.value)} value={email}/>
                 </div>
-                <button className='px-[50px] py-[10px] bg-[var(--zenstay-accent)] text-[white] text-[18px] md:px-[100px] rounded-lg mt-[20px] hover:bg-[var(--zenstay-accent-dark)] transition-colors' disabled={loading}>{loading ? "Loading..." : "Send OTP"}</button>
+                <button className='px-[50px] py-[10px] bg-[var(--zenstay-accent)] text-[white] text-[18px] md:px-[100px] rounded-lg mt-[20px] hover:bg-[var(--zenstay-accent-dark)] transition-colors' disabled={loading}>{loading ? "Loading..." : "Continue"}</button>
             </form>
         </div>
     )
