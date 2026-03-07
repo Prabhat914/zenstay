@@ -3,6 +3,7 @@ import User from "../model/user.model.js"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
 import { hasMailConfig, sendOtpEmail } from "../config/mail.js"
+import { hasSmsConfig, sendOtpSms } from "../config/sms.js"
 
 const buildCookieOptions = () => {
     const isProduction = process.env.NODE_ENVIRONMENT === "production"
@@ -16,23 +17,42 @@ const buildCookieOptions = () => {
 const serializeUser = (userDoc) => {
     const obj = typeof userDoc?.toObject === "function" ? userDoc.toObject() : { ...(userDoc || {}) }
     delete obj.password
+    delete obj.phoneOtp
     delete obj.resetPasswordOtp
     delete obj.resetPasswordOtpExpire
     return obj
 }
 const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000))
+const normalizePhone = (value) => String(value || "").replace(/[^\d+]/g, "").trim()
+const findUserByIdentifier = async (identifier) => {
+    const value = String(identifier || "").trim()
+    if (!value) return null
+    if (value.includes("@")) {
+        return User.findOne({ email: value })
+    }
+    return User.findOne({ phone: normalizePhone(value) })
+}
 
 export const sighUp=async (req,res) => {
     try {
-        let {name,email,password,location,country,mapUrl} = req.body
+        let {name,email,phone,password,location,country,mapUrl} = req.body
         let existUser = await User.findOne({email})
         if(existUser){
             return res.status(400).json({message:"User is already exist"})
+        }
+        const normalizedPhone = normalizePhone(phone)
+        if (!normalizedPhone) {
+            return res.status(400).json({message:"Phone number is required"})
+        }
+        let existPhone = await User.findOne({ phone: normalizedPhone })
+        if(existPhone){
+            return res.status(400).json({message:"Phone number is already exist"})
         }
         let hashPassword = await bcrypt.hash(password,10)
         let user = await User.create({
             name,
             email,
+            phone: normalizedPhone,
             password:hashPassword,
             location: String(location || "").trim(),
             country: String(country || "").trim(),
@@ -80,12 +100,12 @@ export const logOut = async (req,res) => {
 
 export const forgotPassword = async (req,res) => {
     try {
-        const { email } = req.body
-        if (!email) {
-            return res.status(400).json({ message: "Email is required" })
+        const identifier = String(req.body?.identifier || req.body?.email || req.body?.phone || "").trim()
+        if (!identifier) {
+            return res.status(400).json({ message: "Email or phone is required" })
         }
 
-        const user = await User.findOne({ email })
+        const user = await findUserByIdentifier(identifier)
         if (!user) {
             return res.status(200).json({
                 message: "If this email exists, an OTP has been sent."
@@ -99,19 +119,28 @@ export const forgotPassword = async (req,res) => {
         user.resetPasswordOtpExpire = Date.now() + 10 * 60 * 1000
         await user.save()
 
-        if (!hasMailConfig && process.env.NODE_ENVIRONMENT === "production") {
+        const isEmailFlow = Boolean(String(identifier).includes("@"))
+        if (isEmailFlow && !hasMailConfig && process.env.NODE_ENVIRONMENT === "production") {
             return res.status(500).json({ message: "OTP email service is not configured" })
         }
+        if (!isEmailFlow && !hasSmsConfig && process.env.NODE_ENVIRONMENT === "production") {
+            return res.status(500).json({ message: "OTP SMS service is not configured" })
+        }
 
-        if (hasMailConfig) {
+        if (isEmailFlow && hasMailConfig) {
             await sendOtpEmail({ toEmail: user.email, otp })
+        }
+        if (!isEmailFlow && hasSmsConfig) {
+            await sendOtpSms({ toPhone: user.phone, otp })
         }
 
         const response = {
-            message: hasMailConfig ? "OTP sent to your email." : "OTP generated successfully.",
-            email: user.email
+            message: isEmailFlow
+                ? (hasMailConfig ? "OTP sent to your email." : "OTP generated successfully.")
+                : (hasSmsConfig ? "OTP sent to your phone." : "OTP generated successfully."),
+            identifier: isEmailFlow ? user.email : user.phone
         }
-        if (!hasMailConfig) {
+        if ((isEmailFlow && !hasMailConfig) || (!isEmailFlow && !hasSmsConfig)) {
             response.otp = otp
         }
 
@@ -123,15 +152,16 @@ export const forgotPassword = async (req,res) => {
 
 export const verifyResetOtp = async (req,res) => {
     try {
-        const { email, otp } = req.body
+        const identifier = String(req.body?.identifier || req.body?.email || req.body?.phone || "").trim()
+        const { otp } = req.body
 
-        if (!email || !otp) {
-            return res.status(400).json({ message: "Email and OTP are required" })
+        if (!identifier || !otp) {
+            return res.status(400).json({ message: "Email or phone and OTP are required" })
         }
 
         const hashedOtp = crypto.createHash("sha256").update(String(otp)).digest("hex")
         const user = await User.findOne({
-            email,
+            ...(identifier.includes("@") ? { email: identifier } : { phone: normalizePhone(identifier) }),
             resetPasswordOtp: hashedOtp,
             resetPasswordOtpExpire: { $gt: Date.now() }
         })
@@ -148,10 +178,11 @@ export const verifyResetOtp = async (req,res) => {
 
 export const resetPassword = async (req,res) => {
     try {
-        const { email, otp, password, confirmPassword } = req.body
+        const identifier = String(req.body?.identifier || req.body?.email || req.body?.phone || "").trim()
+        const { otp, password, confirmPassword } = req.body
 
-        if (!email || !otp) {
-            return res.status(400).json({ message: "Email and OTP are required" })
+        if (!identifier || !otp) {
+            return res.status(400).json({ message: "Email or phone and OTP are required" })
         }
 
         if (!password || !confirmPassword) {
@@ -166,7 +197,7 @@ export const resetPassword = async (req,res) => {
 
         const hashedOtp = crypto.createHash("sha256").update(String(otp)).digest("hex")
         const user = await User.findOne({
-            email,
+            ...(identifier.includes("@") ? { email: identifier } : { phone: normalizePhone(identifier) }),
             resetPasswordOtp: hashedOtp,
             resetPasswordOtpExpire: { $gt: Date.now() }
         })

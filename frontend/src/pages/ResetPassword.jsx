@@ -12,7 +12,7 @@ function ResetPassword() {
     let {serverUrl} = useContext(authDataContext)
     let [show,setShow] = useState(false)
     let [showConfirm,setShowConfirm] = useState(false)
-    let [email,setEmail]= useState(searchParams.get("email") || "")
+    let [identifier,setIdentifier]= useState(searchParams.get("identifier") || "")
     let [otp,setOtp]= useState("")
     let [password,setPassword]= useState("")
     let [confirmPassword,setConfirmPassword]= useState("")
@@ -24,7 +24,7 @@ function ResetPassword() {
         setLoading(true)
         try {
             const result = await axios.post(serverUrl + `/api/auth/verify-reset-otp`, {
-                email,
+                identifier,
                 otp
             })
             setLoading(false)
@@ -42,7 +42,7 @@ function ResetPassword() {
         setLoading(true)
         try {
             const result = await axios.post(serverUrl + `/api/auth/reset-password`, {
-                email,
+                identifier,
                 otp,
                 password,
                 confirmPassword
@@ -63,8 +63,8 @@ function ResetPassword() {
                 <h1 className='text-[30px] text-[black]'>Reset Password</h1>
                 <p className='text-[16px] text-[#555]'>{otpVerified ? "Set your new password below." : "First verify the OTP sent to your email."}</p>
                 <div className='w-[90%] flex items-start justify-start flex-col gap-[10px] mt-[20px]'>
-                    <label htmlFor="email" className='text-[20px]'>Email</label>
-                    <input type="email" id='email' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px]' required onChange={(e)=>setEmail(e.target.value)} value={email} disabled={otpVerified}/>
+                    <label htmlFor="identifier" className='text-[20px]'>Email or Phone</label>
+                    <input type="text" id='identifier' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px]' required onChange={(e)=>setIdentifier(e.target.value)} value={identifier} disabled={otpVerified}/>
                 </div>
                 <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
                     <label htmlFor="otp" className='text-[20px]'>OTP</label>

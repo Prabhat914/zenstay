@@ -9,6 +9,11 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    phone:{
+        type:String,
+        default:"",
+        index:true
+    },
     location:{
         type:String,
         default:""

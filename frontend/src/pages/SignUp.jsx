@@ -15,6 +15,7 @@ function SignUp() {
     let {userData,setUserData} = useContext(userDataContext)
     let [name,setName]= useState("")
     let [email,setEmail]= useState("")
+    let [phone,setPhone]= useState("")
     let [location,setLocation]= useState("")
     let [country,setCountry]= useState("")
     let [password,setPassword]= useState("")
@@ -37,6 +38,7 @@ function SignUp() {
             let result = await axios.post(serverUrl + "/api/auth/signup",{
                 name,
                 email,
+                phone,
                 location,
                 country,
                 mapUrl,
@@ -74,6 +76,10 @@ function SignUp() {
           <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
           <label htmlFor="email" className='text-[20px]'>Email</label>
           <input type="text" id='email' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px]' required onChange={(e)=>setEmail(e.target.value)} value={email}/>
+          </div> 
+          <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
+          <label htmlFor="phone" className='text-[20px]'>Phone Number</label>
+          <input type="text" id='phone' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px]' required onChange={(e)=>setPhone(e.target.value)} value={phone}/>
           </div> 
           <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
           <label htmlFor="location" className='text-[20px]'>Location</label>
