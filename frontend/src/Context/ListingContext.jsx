@@ -336,6 +336,12 @@ function ListingContext({children}) {
             isTrending: true
         }
     ]
+    const mergeListings = (items = []) => {
+        const backendItems = Array.isArray(items) ? items.filter(Boolean) : []
+        const seenIds = new Set(backendItems.map((item) => String(item?._id || "")))
+        const missingDemoItems = demoListings.filter((item) => !seenIds.has(String(item?._id || "")))
+        return [...backendItems, ...missingDemoItems]
+    }
 
     let {serverUrl} = useContext(authDataContext)
 
@@ -438,8 +444,9 @@ function ListingContext({children}) {
                 }
                 return
             }
-            setListingData(items)
-            setNewListData(items)
+            const mergedItems = mergeListings(items)
+            setListingData(mergedItems)
+            setNewListData(mergedItems)
             didShowFallbackToast.current = false
 
         } catch (error) {
