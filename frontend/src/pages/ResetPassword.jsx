@@ -23,9 +23,18 @@ function ResetPassword() {
         e.preventDefault()
         setLoading(true)
         try {
-            const result = await axios.post(serverUrl + `/api/auth/verify-reset-otp`, {
-                identifier,
+            const normalizedIdentifier = String(identifier || "").trim()
+            const requestBody = {
+                identifier: normalizedIdentifier,
                 otp
+            }
+            if (normalizedIdentifier.includes("@")) {
+                requestBody.email = normalizedIdentifier
+            } else {
+                requestBody.phone = normalizedIdentifier
+            }
+            const result = await axios.post(serverUrl + `/api/auth/verify-reset-otp`, {
+                ...requestBody
             })
             setLoading(false)
             setOtpVerified(true)
@@ -41,11 +50,20 @@ function ResetPassword() {
         e.preventDefault()
         setLoading(true)
         try {
-            const result = await axios.post(serverUrl + `/api/auth/reset-password`, {
-                identifier,
+            const normalizedIdentifier = String(identifier || "").trim()
+            const requestBody = {
+                identifier: normalizedIdentifier,
                 otp,
                 password,
                 confirmPassword
+            }
+            if (normalizedIdentifier.includes("@")) {
+                requestBody.email = normalizedIdentifier
+            } else {
+                requestBody.phone = normalizedIdentifier
+            }
+            const result = await axios.post(serverUrl + `/api/auth/reset-password`, {
+                ...requestBody
             })
             setLoading(false)
             toast.success(result.data?.message || "Password reset successful")

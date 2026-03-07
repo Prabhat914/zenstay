@@ -15,7 +15,14 @@ function ForgotPassword() {
         e.preventDefault()
         setLoading(true)
         try {
-            const result = await axios.post(serverUrl + "/api/auth/forgot-password", { identifier })
+            const normalizedIdentifier = String(identifier || "").trim()
+            const requestBody = { identifier: normalizedIdentifier }
+            if (normalizedIdentifier.includes("@")) {
+                requestBody.email = normalizedIdentifier
+            } else {
+                requestBody.phone = normalizedIdentifier
+            }
+            const result = await axios.post(serverUrl + "/api/auth/forgot-password", requestBody)
             setLoading(false)
             toast.success(result.data?.message || "OTP sent successfully")
             if (result.data?.otp) {
