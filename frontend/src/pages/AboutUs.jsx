@@ -6,7 +6,7 @@ function AboutUs() {
     <LegalPageTemplate
       slug="about-us"
       fallbackTitle="About Us"
-      fallbackContent="Zenstay is a stay-booking platform for villas, farm houses, pool houses, rooms, rental rooms, flats, PGs, cabins and shops. Our goal is to keep booking simple, transparent, and fast for guests and hosts."
+      fallbackContent="Zenstay is a stay-booking platform for villas, farm houses, pool houses, rooms, flats, PGs, cabins and shops. Our goal is to keep booking simple, transparent, and fast for guests and hosts."
     />
   )
 }

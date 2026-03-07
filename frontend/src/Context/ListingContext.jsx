@@ -160,38 +160,6 @@ function ListingContext({children}) {
             isTrending: true
         },
         {
-            _id: "demo-rental-1",
-            title: "Zenstay Budget Rental Room",
-            landMark: "Karol Bagh",
-            city: "Delhi",
-            country: "India",
-            rent: 1800,
-            ratings: 4.2,
-            image1: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
-            image2: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
-            image3: "https://images.unsplash.com/photo-1560185007-5f0bb1866cab?auto=format&fit=crop&w=1200&q=80",
-            isBooked: false,
-            host: "demo-host",
-            category: "rentalRooms",
-            isTrending: false
-        },
-        {
-            _id: "demo-rental-2",
-            title: "Zenstay Monthly Rental Room",
-            landMark: "Banjara Hills",
-            city: "Hyderabad",
-            country: "India",
-            rent: 2200,
-            ratings: 4.4,
-            image1: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
-            image2: "https://images.unsplash.com/photo-1616594039964-3f2b9dd2f7ab?auto=format&fit=crop&w=1200&q=80",
-            image3: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1200&q=80",
-            isBooked: false,
-            host: "demo-host",
-            category: "rentalRooms",
-            isTrending: true
-        },
-        {
             _id: "demo-flat-1",
             title: "Zenstay Service Flat Central",
             landMark: "Andheri West",

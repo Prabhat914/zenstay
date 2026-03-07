@@ -1,19 +1,51 @@
 import React from 'react'
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom';
-import { GiFamilyHouse } from "react-icons/gi";
-import { MdBedroomParent } from "react-icons/md";
-
-import { MdOutlinePool } from "react-icons/md";
-import { GiWoodCabin } from "react-icons/gi";
-import { SiHomeassistantcommunitystore } from "react-icons/si";
-
-import { IoBedOutline } from "react-icons/io5";
-
-import { FaTreeCity } from "react-icons/fa6";
-import { BiBuildingHouse } from "react-icons/bi";
 import { useContext } from 'react';
 import { listingDataContext } from '../Context/ListingContext';
+
+const categoryItems = [
+    {
+        key: "villa",
+        label: "Villa",
+        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        key: "farmHouse",
+        label: "Farm House",
+        image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        key: "poolHouse",
+        label: "Pool House",
+        image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        key: "rooms",
+        label: "Rooms",
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        key: "flat",
+        label: "Flat",
+        image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        key: "pg",
+        label: "PG",
+        image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        key: "cabin",
+        label: "Cabins",
+        image: "https://images.unsplash.com/photo-1472224371017-08207f84aaae?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        key: "shops",
+        label: "Shops",
+        image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80"
+    }
+]
 
 function ListingPage2() {
 
@@ -28,44 +60,17 @@ function ListingPage2() {
         <h1 className='text-[18px] text-[black] md:text-[30px] px-[10px] '>Which of these best describes your place?</h1>
         
         <div className='max-w-[900px] w-[100%] h-[100%] flex flex-wrap items-center justify-center gap-[15px] md:w-[70%]'>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "villa" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("villa")}>
-            <GiFamilyHouse className='w-[30px] h-[30px] text-[black]' /><h3>Villa</h3>
-            </div>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "farmHouse" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("farmHouse")}>
-            <FaTreeCity className='w-[30px] h-[30px] text-[black]' /><h3>Farm House</h3>
-            </div>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "poolHouse" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("poolHouse")}>
-            <MdOutlinePool className='w-[30px] h-[30px] text-[black]' /><h3>Pool House</h3>
-            </div>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "rooms" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("rooms")}>
-            <MdBedroomParent className='w-[30px] h-[30px] text-[black]' /><h3>Rooms</h3>
-            </div>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "rentalRooms" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("rentalRooms")}>
-            <MdBedroomParent className='w-[30px] h-[30px] text-[black]' /><h3>Rental Rooms</h3>
-            </div>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "flat" ?"border-3 border-[#8b8b8b]" : ""}`}onClick={()=>setCategory("flat")}>
-            <BiBuildingHouse className='w-[30px] h-[30px] text-[black]' /><h3>Flat</h3>
-            </div>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "pg" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("pg")}>
-            <IoBedOutline className='w-[30px] h-[30px] text-[black]' /><h3>PG</h3>
-            </div>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "cabin" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("cabin")}>
-            <GiWoodCabin className='w-[30px] h-[30px] text-[black]' /><h3>Cabin</h3>
-            </div>
-
-            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "shops" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("shops")}>
-            <SiHomeassistantcommunitystore className='w-[30px] h-[30px] text-[black]' /><h3>Shops</h3>
-            </div>
-
-            
+            {categoryItems.map((item) => (
+                <div
+                    key={item.key}
+                    className={`w-[180px] h-[150px] flex justify-end items-center flex-col cursor-pointer border-[2px] border-transparent hover:border-[#a6a5a5] text-[16px] rounded-lg overflow-hidden relative transition duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(15,23,42,0.16)] ${category == item.key ?"border-[#8b8b8b]" : "border-[#ececec]"}`}
+                    onClick={()=>setCategory(item.key)}
+                >
+                    <img src={item.image} alt={item.label} className='absolute inset-0 w-full h-full object-cover' />
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent' />
+                    <h3 className='relative z-10 w-full py-[12px] text-center text-white font-semibold'>{item.label}</h3>
+                </div>
+            ))}
         </div>
         <button className='px-[50px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg absolute right-[5%] bottom-[5%]' onClick={()=>navigate("/listingpage3")} disabled={!category}>Next</button>
         </div>
