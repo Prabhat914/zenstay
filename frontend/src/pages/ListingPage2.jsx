@@ -45,6 +45,10 @@ function ListingPage2() {
             <MdBedroomParent className='w-[30px] h-[30px] text-[black]' /><h3>Rooms</h3>
             </div>
 
+            <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "rentalRooms" ?"border-3 border-[#8b8b8b]" : ""}`} onClick={()=>setCategory("rentalRooms")}>
+            <MdBedroomParent className='w-[30px] h-[30px] text-[black]' /><h3>Rental Rooms</h3>
+            </div>
+
             <div className={`w-[180px] h-[100px] flex justify-center items-center flex-col cursor-pointer border-[2px] hover:border-[#a6a5a5] text-[16px] rounded-lg ${category == "flat" ?"border-3 border-[#8b8b8b]" : ""}`}onClick={()=>setCategory("flat")}>
             <BiBuildingHouse className='w-[30px] h-[30px] text-[black]' /><h3>Flat</h3>
             </div>

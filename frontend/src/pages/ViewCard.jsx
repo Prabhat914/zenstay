@@ -19,6 +19,7 @@ function ViewCard() {
         description: "Comfortable room stay.",
         rent: 0,
         city: "City",
+        country: "",
         landMark: "Location",
         category: "rooms",
         image1: "",
@@ -153,7 +154,7 @@ function ViewCard() {
     
              <div className='w-[95%]  flex items-start justify-start text-[25px] md:w-[80%] mb-[10px]'>
                 <h1 className='text-[20px]  text-[#272727] md:text-[30px] text-ellipsis text-nowrap overflow-hidden px-[70px] md:px-[0px]'>
-                    {`In ${cardDetails.landMark.toUpperCase()} , ${cardDetails.city.toUpperCase()}`}
+                    {`In ${cardDetails.landMark.toUpperCase()} , ${cardDetails.city.toUpperCase()}${cardDetails.country ? `, ${String(cardDetails.country).toUpperCase()}` : ""}`}
                 </h1>
              </div>
     
@@ -285,7 +286,7 @@ function ViewCard() {
 
                                 <div className='w-[70px] h-[90px] flex items-center justify-center flex-shrink-0 rounded-lg md:w-[100px] md:h-[100px]'><img className='w-[100%] h-[100%] rounded-lg' src={cardDetails.image1 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" /></div>
                                 <div className='w-[80%] h-[100px] gap-[5px]'>
-                                <h1 className='w-[90%] truncate'>{`IN ${cardDetails.landMark.toUpperCase()},${cardDetails.city.toUpperCase()} `}</h1>
+                                <h1 className='w-[90%] truncate'>{`IN ${cardDetails.landMark.toUpperCase()}, ${cardDetails.city.toUpperCase()}${cardDetails.country ? `, ${String(cardDetails.country).toUpperCase()}` : ""}`}</h1>
                                 <h1>{cardDetails.title.toUpperCase()}</h1>
                                 <h1>{cardDetails.category.toUpperCase()}</h1>
                                 <h1 className='flex items-center justify-start gap-[5px]'><FaStar className='text-[#eb6262]' />{cardDetails.ratings}</h1>

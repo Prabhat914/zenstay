@@ -36,6 +36,7 @@ function ListingContext({children}) {
             title: "Zenstay Trending Hill Villa",
             landMark: "Lonavala Lake",
             city: "Lonavala",
+            country: "India",
             rent: 6200,
             ratings: 4.8,
             image1: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80",
@@ -51,6 +52,7 @@ function ListingContext({children}) {
             title: "Zenstay Palm Villa",
             landMark: "Assagao",
             city: "Goa",
+            country: "India",
             rent: 5700,
             ratings: 4.6,
             image1: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
@@ -66,6 +68,7 @@ function ListingContext({children}) {
             title: "Zenstay Green Farm House",
             landMark: "Sohna Road",
             city: "Gurugram",
+            country: "India",
             rent: 4800,
             ratings: 4.5,
             image1: "https://images.unsplash.com/photo-1448630360428-65456885c650?auto=format&fit=crop&w=1200&q=80",
@@ -81,6 +84,7 @@ function ListingContext({children}) {
             title: "Zenstay Orchard Farm House",
             landMark: "Mansarovar",
             city: "Jaipur",
+            country: "India",
             rent: 4300,
             ratings: 4.4,
             image1: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=80",
@@ -96,6 +100,7 @@ function ListingContext({children}) {
             title: "Zenstay Blue Pool House",
             landMark: "Calangute",
             city: "Goa",
+            country: "India",
             rent: 6900,
             ratings: 4.9,
             image1: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80",
@@ -111,6 +116,7 @@ function ListingContext({children}) {
             title: "Zenstay Courtyard Pool House",
             landMark: "ECR",
             city: "Chennai",
+            country: "India",
             rent: 5400,
             ratings: 4.5,
             image1: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
@@ -126,6 +132,7 @@ function ListingContext({children}) {
             title: "Zenstay Executive Rooms",
             landMark: "Cyber Hub",
             city: "Gurugram",
+            country: "India",
             rent: 2600,
             ratings: 4.3,
             image1: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
@@ -141,6 +148,7 @@ function ListingContext({children}) {
             title: "Zenstay Lake View Rooms",
             landMark: "Fateh Sagar",
             city: "Udaipur",
+            country: "India",
             rent: 3000,
             ratings: 4.6,
             image1: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
@@ -152,10 +160,43 @@ function ListingContext({children}) {
             isTrending: true
         },
         {
+            _id: "demo-rental-1",
+            title: "Zenstay Budget Rental Room",
+            landMark: "Karol Bagh",
+            city: "Delhi",
+            country: "India",
+            rent: 1800,
+            ratings: 4.2,
+            image1: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+            image2: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+            image3: "https://images.unsplash.com/photo-1560185007-5f0bb1866cab?auto=format&fit=crop&w=1200&q=80",
+            isBooked: false,
+            host: "demo-host",
+            category: "rentalRooms",
+            isTrending: false
+        },
+        {
+            _id: "demo-rental-2",
+            title: "Zenstay Monthly Rental Room",
+            landMark: "Banjara Hills",
+            city: "Hyderabad",
+            country: "India",
+            rent: 2200,
+            ratings: 4.4,
+            image1: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+            image2: "https://images.unsplash.com/photo-1616594039964-3f2b9dd2f7ab?auto=format&fit=crop&w=1200&q=80",
+            image3: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1200&q=80",
+            isBooked: false,
+            host: "demo-host",
+            category: "rentalRooms",
+            isTrending: true
+        },
+        {
             _id: "demo-flat-1",
             title: "Zenstay Service Flat Central",
             landMark: "Andheri West",
             city: "Mumbai",
+            country: "India",
             rent: 3400,
             ratings: 4.4,
             image1: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
@@ -171,6 +212,7 @@ function ListingContext({children}) {
             title: "Zenstay Skyline Flat",
             landMark: "Whitefield",
             city: "Bengaluru",
+            country: "India",
             rent: 3700,
             ratings: 4.5,
             image1: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
@@ -186,6 +228,7 @@ function ListingContext({children}) {
             title: "Zenstay Student PG",
             landMark: "Hinjewadi",
             city: "Pune",
+            country: "India",
             rent: 1500,
             ratings: 4.1,
             image1: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80",
@@ -201,6 +244,7 @@ function ListingContext({children}) {
             title: "Zenstay Premium PG",
             landMark: "Sector 62",
             city: "Noida",
+            country: "India",
             rent: 1900,
             ratings: 4.2,
             image1: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?auto=format&fit=crop&w=1200&q=80",
@@ -216,6 +260,7 @@ function ListingContext({children}) {
             title: "Zenstay Pine Cabin",
             landMark: "Old Manali",
             city: "Manali",
+            country: "India",
             rent: 4100,
             ratings: 4.7,
             image1: "https://images.unsplash.com/photo-1472224371017-08207f84aaae?auto=format&fit=crop&w=1200&q=80",
@@ -231,6 +276,7 @@ function ListingContext({children}) {
             title: "Zenstay Snowline Cabin",
             landMark: "Narkanda",
             city: "Shimla",
+            country: "India",
             rent: 4600,
             ratings: 4.8,
             image1: "https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=1200&q=80",
@@ -246,6 +292,7 @@ function ListingContext({children}) {
             title: "Zenstay Retail Shop Corner",
             landMark: "MG Road",
             city: "Indore",
+            country: "India",
             rent: 5200,
             ratings: 4.2,
             image1: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80",
@@ -261,6 +308,7 @@ function ListingContext({children}) {
             title: "Zenstay High Street Shop",
             landMark: "Linking Road",
             city: "Mumbai",
+            country: "India",
             rent: 6800,
             ratings: 4.6,
             image1: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1200&q=80",
@@ -317,7 +365,12 @@ function ListingContext({children}) {
         }
         
      }
-     const handleViewCard = async (id) => {
+     const handleViewCard = async (id, preloadedListing = null) => {
+        if (preloadedListing && typeof preloadedListing === "object") {
+            setCardDetails(preloadedListing)
+            navigate("/viewcard")
+            return
+        }
         try {
             let result = await axios.get( serverUrl + `/api/listing/findlistingbyid/${id}`,{withCredentials:true})
             console.log(result.data)
@@ -325,6 +378,13 @@ function ListingContext({children}) {
             navigate("/viewcard")
         } catch (error) {
             console.log(error)
+            const fallbackListing = (listingData || []).find((item) => String(item?._id) === String(id))
+            if (fallbackListing) {
+                setCardDetails(fallbackListing)
+                navigate("/viewcard")
+                return
+            }
+            toast.error("Unable to open this listing right now.")
         }
         
      }
@@ -332,13 +392,18 @@ function ListingContext({children}) {
         try {
             if (!String(data || "").trim()) {
                 setSearchData([])
-                return
+                return []
             }
-            let result = await axios.get(serverUrl + `/api/listing/search?query=${data}`)
-            setSearchData(result.data)
+            let result = await axios.get(serverUrl + "/api/listing/search", {
+                params: { query: data }
+            })
+            const items = Array.isArray(result.data) ? result.data : []
+            setSearchData(items)
+            return items
         } catch (error) {
             setSearchData([])
             console.log(error)
+            return []
             
         }
         
