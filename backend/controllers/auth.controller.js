@@ -2,6 +2,7 @@ import genToken from "../config/token.js"
 import User from "../model/user.model.js"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
+import { hasMailConfig, sendOtpEmail } from "../config/mail.js"
 
 const buildCookieOptions = () => {
     const isProduction = process.env.NODE_ENVIRONMENT === "production"
@@ -98,10 +99,20 @@ export const forgotPassword = async (req,res) => {
         user.resetPasswordOtpExpire = Date.now() + 10 * 60 * 1000
         await user.save()
 
+        if (!hasMailConfig && process.env.NODE_ENVIRONMENT === "production") {
+            return res.status(500).json({ message: "OTP email service is not configured" })
+        }
+
+        if (hasMailConfig) {
+            await sendOtpEmail({ toEmail: user.email, otp })
+        }
+
         const response = {
-            message: "OTP generated successfully.",
-            email: user.email,
-            otp
+            message: hasMailConfig ? "OTP sent to your email." : "OTP generated successfully.",
+            email: user.email
+        }
+        if (!hasMailConfig) {
+            response.otp = otp
         }
 
         return res.status(200).json(response)

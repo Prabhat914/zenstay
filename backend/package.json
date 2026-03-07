@@ -7,11 +7,16 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "dev": "concurrently -k -n API,WEB -c green,cyan \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "nodemon index.js",
     "dev:web": "npm --prefix ../frontend run dev:frontend",
+    "seed": "node scripts/seedListings.js",
+    "seed:topup": "node scripts/topupListingsToTen.js",
+    "seed:repair-images": "node scripts/repairListingImages.js",
     "seed:import-data": "node scripts/importFromDataFile.js",
-    "seed:cleanup-legacy": "node scripts/cleanupLegacySeedListings.js"
+    "seed:cleanup-legacy": "node scripts/cleanupLegacySeedListings.js",
+    "seed:all": "npm run seed:cleanup-legacy && npm run seed:import-data"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -24,6 +29,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
     "multer": "^1.4.5-lts.2",
+    "nodemailer": "^6.10.1",
     "nodemon": "^3.1.9"
   }
 }

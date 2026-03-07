@@ -17,10 +17,10 @@ function ForgotPassword() {
         try {
             const result = await axios.post(serverUrl + "/api/auth/forgot-password", { email })
             setLoading(false)
-            if (result.data?.otp) {
-                toast.success(`OTP: ${result.data.otp}`)
-            }
             toast.success(result.data?.message || "OTP sent successfully")
+            if (result.data?.otp) {
+                toast.info(`Dev OTP: ${result.data.otp}`)
+            }
             navigate(`/reset-password?email=${encodeURIComponent(email)}`)
         } catch (error) {
             setLoading(false)
