@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 
 function Login() {
     let [show,setShow] = useState(false)
-    let {serverUrl} = useContext(authDataContext)
+    let {serverUrl,setAuthToken} = useContext(authDataContext)
     let {userData,setUserData} = useContext(userDataContext)
     let [email,setEmail]= useState("")
     let [password,setPassword]= useState("")
@@ -26,7 +26,13 @@ function Login() {
     
                 },{withCredentials:true})
                 setLoading(false)
-                setUserData(result.data)
+                const token = result?.data?.token || ""
+                const { token: _token, ...userPayload } = result?.data || {}
+                setUserData(userPayload)
+                setAuthToken(token)
+                if (token) {
+                    localStorage.setItem("zenstay_token", token)
+                }
                 navigate("/")
                 console.log(result)
                  toast.success("Login Successfully")
@@ -40,7 +46,7 @@ function Login() {
         }
   return (
      <div className='w-[100vw] h-[100vh] flex items-center justify-center relative'>
-        <div className='w-[50px] h-[50px] bg-[red] cursor-pointer absolute top-[10%] left-[20px] rounded-[50%] flex items-center justify-center' onClick={()=>navigate("/")}><FaArrowLeftLong className='w-[25px] h-[25px] text-[white]' /></div>
+        <div className='w-[50px] h-[50px] bg-[var(--zenstay-accent)] cursor-pointer absolute top-[10%] left-[20px] rounded-[50%] flex items-center justify-center' onClick={()=>navigate("/")}><FaArrowLeftLong className='w-[25px] h-[25px] text-[white]' /></div>
             <form action="" className='max-w-[900px] w-[90%] h-[600px] flex items-center justify-center flex-col md:items-start gap-[10px]' onSubmit={handleLogin}>
                 <h1 className='text-[30px] text-[black]'>Welcome to Zenstay</h1>
                 <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
@@ -53,9 +59,9 @@ function Login() {
               {!show && <IoMdEye className='w-[22px] h-[22px] absolute right-[12%] bottom-[10px] cursor-pointer' onClick={()=>setShow(prev =>!prev)}/>}
               {show && <IoMdEyeOff className='w-[22px] h-[22px] absolute right-[12%] bottom-[10px] cursor-pointer' onClick={()=>setShow(prev =>!prev)}/>}
               </div>
-              <p className='w-[90%] text-[16px] text-[red] cursor-pointer' onClick={()=>navigate("/forgot-password")}>Forgot Password?</p>
-              <button className='px-[50px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg ' disabled={loading}>{loading?"Loading...":"Login"}</button>
-              <p className='text-[18px]'>Create new account <span className='text-[19px] text-[red] cursor-pointer' onClick={()=>navigate("/SignUP")}>SignUp</span>
+              <p className='w-[90%] text-[16px] text-[var(--zenstay-accent)] cursor-pointer' onClick={()=>navigate("/forgot-password")}>Forgot Password?</p>
+              <button className='px-[50px] py-[10px] bg-[var(--zenstay-accent)] text-[white] text-[18px] md:px-[100px] rounded-lg hover:bg-[var(--zenstay-accent-dark)] transition-colors' disabled={loading}>{loading?"Loading...":"Login"}</button>
+              <p className='text-[18px]'>Create new account <span className='text-[19px] text-[var(--zenstay-accent)] cursor-pointer' onClick={()=>navigate("/SignUP")}>SignUp</span>
               </p>
             </form>
          

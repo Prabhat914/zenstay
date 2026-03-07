@@ -166,13 +166,13 @@ function Nav() {
                     <img
                         src={logo}
                         alt="Zenstay logo"
-                        className='w-[56px] h-[56px] rounded-full object-cover transition duration-300 ease-out group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-[0_12px_30px_rgba(239,68,68,0.28)]'
+                        className='w-[56px] h-[56px] rounded-full object-cover transition duration-300 ease-out group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-[0_12px_30px_var(--zenstay-accent-shadow)]'
                     />
                 </div>
 
                 <div className='w-[35%] relative hidden md:block '>
-                    <input type="text" className='w-[100%] px-[30px] py-[10px] border-[2px] border-[#bdbaba] outline-none overflow-auto rounded-[30px] text-[17px] transition duration-300 ease-out hover:border-[#ef4444] hover:shadow-[0_10px_30px_rgba(239,68,68,0.12)] focus:border-[#ef4444] focus:shadow-[0_12px_30px_rgba(239,68,68,0.18)]' placeholder='Any Where  |  Any Location  |  Any City/Country 'onChange={(e)=>setInput(e.target.value)} value={input} onKeyDown={(e)=>{if(e.key==="Enter"){e.preventDefault();handleSearchSubmit()}}}/>
-                    <button className='absolute p-[10px] rounded-[50px] bg-[red] right-[3%] top-[5px] transition duration-300 ease-out hover:scale-110 hover:bg-[#b91c1c] hover:shadow-[0_10px_25px_rgba(239,68,68,0.35)]' onClick={handleSearchSubmit}><FiSearch className='w-[20px] h-[20px] text-[white]' /></button>
+                    <input type="text" className='w-[100%] px-[30px] py-[10px] border-[2px] border-[#bdbaba] outline-none overflow-auto rounded-[30px] text-[17px] transition duration-300 ease-out hover:border-[var(--zenstay-accent)] hover:shadow-[0_10px_30px_var(--zenstay-accent-shadow-soft)] focus:border-[var(--zenstay-accent)] focus:shadow-[0_12px_30px_var(--zenstay-accent-shadow-soft)]' placeholder='Any Where  |  Any Location  |  Any City/Country 'onChange={(e)=>setInput(e.target.value)} value={input} onKeyDown={(e)=>{if(e.key==="Enter"){e.preventDefault();handleSearchSubmit()}}}/>
+                    <button className='absolute p-[10px] rounded-[50px] bg-[var(--zenstay-accent)] right-[3%] top-[5px] transition duration-300 ease-out hover:scale-110 hover:bg-[var(--zenstay-accent-dark)] hover:shadow-[0_10px_25px_var(--zenstay-accent-shadow)]' onClick={handleSearchSubmit}><FiSearch className='w-[20px] h-[20px] text-[white]' /></button>
                 </div>
                 <div className='flex items-center justify-center    gap-[10px] relative'>
                     <span className='text-[18px] cursor-pointer rounded-[50px] hover:bg-[#ded9d9] px-[8px] py-[5px] hidden md:block' onClick={()=>openProtectedRoute("/listingpage1")}>List your home</span>
@@ -212,8 +212,8 @@ function Nav() {
             <div className='w-[100%] h-[60px] flex items-center justify-center  md:hidden 
             '>
                 <div className='w-[80%] relative '>
-                    <input type="text" className='w-[100%] px-[30px] py-[10px] border-[2px] border-[#bdbaba] outline-none overflow-auto rounded-[30px] text-[17px] transition duration-300 ease-out hover:border-[#ef4444] hover:shadow-[0_10px_30px_rgba(239,68,68,0.12)] focus:border-[#ef4444] focus:shadow-[0_12px_30px_rgba(239,68,68,0.18)]' placeholder='Any Where  |  Any Location  |  Any City/Country ' onChange={(e)=>setInput(e.target.value)} value={input} onKeyDown={(e)=>{if(e.key==="Enter"){e.preventDefault();handleSearchSubmit()}}} />
-                    <button className='absolute p-[10px] rounded-[50px] bg-[red] right-[3%] top-[5px] transition duration-300 ease-out hover:scale-110 hover:bg-[#b91c1c] hover:shadow-[0_10px_25px_rgba(239,68,68,0.35)]' onClick={handleSearchSubmit}><FiSearch className='w-[20px] h-[20px] text-[white]' /></button>
+                    <input type="text" className='w-[100%] px-[30px] py-[10px] border-[2px] border-[#bdbaba] outline-none overflow-auto rounded-[30px] text-[17px] transition duration-300 ease-out hover:border-[var(--zenstay-accent)] hover:shadow-[0_10px_30px_var(--zenstay-accent-shadow-soft)] focus:border-[var(--zenstay-accent)] focus:shadow-[0_12px_30px_var(--zenstay-accent-shadow-soft)]' placeholder='Any Where  |  Any Location  |  Any City/Country ' onChange={(e)=>setInput(e.target.value)} value={input} onKeyDown={(e)=>{if(e.key==="Enter"){e.preventDefault();handleSearchSubmit()}}} />
+                    <button className='absolute p-[10px] rounded-[50px] bg-[var(--zenstay-accent)] right-[3%] top-[5px] transition duration-300 ease-out hover:scale-110 hover:bg-[var(--zenstay-accent-dark)] hover:shadow-[0_10px_25px_var(--zenstay-accent-shadow)]' onClick={handleSearchSubmit}><FiSearch className='w-[20px] h-[20px] text-[white]' /></button>
                 </div>
                 </div>
 
@@ -225,10 +225,10 @@ function Nav() {
                 {categoryItems.map((item) => (
                     <div
                         key={item.key}
-                        className={`group flex min-w-[90px] items-center justify-center flex-col border-b-[1px] border-transparent text-[13px] transition duration-300 ease-out hover:-translate-y-1 hover:border-[#ef4444] hover:text-[#ef4444] ${cate==item.key?"border-b-[1px] border-[#a6a5a5]":""}`}
+                        className={`group flex min-w-[90px] items-center justify-center flex-col border-b-[1px] border-transparent text-[13px] transition duration-300 ease-out hover:-translate-y-1 hover:border-[var(--zenstay-accent)] hover:text-[var(--zenstay-accent)] ${cate==item.key?"border-b-[1px] border-[var(--zenstay-accent)] text-[var(--zenstay-accent)]":""}`}
                         onClick={() => handleCategory(item.key)}
                     >
-                        <div className='w-[56px] h-[56px] rounded-full overflow-hidden border border-[#e5e7eb] transition duration-300 ease-out group-hover:shadow-[0_12px_24px_rgba(239,68,68,0.22)] group-hover:scale-110'>
+                        <div className='w-[56px] h-[56px] rounded-full overflow-hidden border border-[#e5e7eb] transition duration-300 ease-out group-hover:shadow-[0_12px_24px_var(--zenstay-accent-shadow)] group-hover:scale-110'>
                             <img src={item.image} alt={item.label} className='w-full h-full object-cover' />
                         </div>
                         <h3 className='mt-[8px] text-center'>{item.label}</h3>

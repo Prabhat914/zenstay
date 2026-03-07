@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 function SignUp() {
     let [show,setShow] = useState(false)
     let navigate = useNavigate()
-    let {serverUrl} = useContext(authDataContext)
+    let {serverUrl,setAuthToken} = useContext(authDataContext)
     let {userData,setUserData} = useContext(userDataContext)
     let [name,setName]= useState("")
     let [email,setEmail]= useState("")
@@ -44,7 +44,13 @@ function SignUp() {
 
             },{withCredentials:true})
             setLoading(false)
-            setUserData(result.data)
+            const token = result?.data?.token || ""
+            const { token: _token, ...userPayload } = result?.data || {}
+            setUserData(userPayload)
+            setAuthToken(token)
+            if (token) {
+              localStorage.setItem("zenstay_token", token)
+            }
             navigate("/")
             toast.success("Signup Successfully")
             console.log(result)
@@ -58,7 +64,7 @@ function SignUp() {
     }
   return (
     <div className='w-[100vw] h-[100vh] flex items-center justify-center relative'>
-        <div className='w-[50px] h-[50px] bg-[red] cursor-pointer absolute top-[10%] left-[20px] rounded-[50%] flex items-center justify-center' onClick={()=>navigate("/")}><FaArrowLeftLong className='w-[25px] h-[25px] text-[white]' /></div>
+        <div className='w-[50px] h-[50px] bg-[var(--zenstay-accent)] cursor-pointer absolute top-[10%] left-[20px] rounded-[50%] flex items-center justify-center' onClick={()=>navigate("/")}><FaArrowLeftLong className='w-[25px] h-[25px] text-[white]' /></div>
         <form action="" className='max-w-[900px] w-[90%] h-[600px] overflow-auto py-[10px] flex items-center justify-center flex-col md:items-start gap-[10px]' onSubmit={handleSignUP}>
             <h1 className='text-[30px] text-[black]'>Welcome to Zenstay</h1>
             <div className='w-[90%] flex items-start justify-start flex-col gap-[10px] mt-[30px] '>
@@ -95,9 +101,9 @@ function SignUp() {
               />
             </div>
           )}
-          <p className='w-[90%] text-[16px] text-[red] cursor-pointer' onClick={()=>navigate("/forgot-password")}>Forgot Password?</p>
-          <button className='px-[50px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg mt-[20px]' disabled={loading}>{loading?"Loading...":"SignUp"}</button>
-          <p className='text-[18px]'>Already have a account? <span className='text-[19px] text-[red] cursor-pointer' onClick={()=>navigate("/login")}>Login</span>
+          <p className='w-[90%] text-[16px] text-[var(--zenstay-accent)] cursor-pointer' onClick={()=>navigate("/forgot-password")}>Forgot Password?</p>
+          <button className='px-[50px] py-[10px] bg-[var(--zenstay-accent)] text-[white] text-[18px] md:px-[100px] rounded-lg mt-[20px] hover:bg-[var(--zenstay-accent-dark)] transition-colors' disabled={loading}>{loading?"Loading...":"SignUp"}</button>
+          <p className='text-[18px]'>Already have a account? <span className='text-[19px] text-[var(--zenstay-accent)] cursor-pointer' onClick={()=>navigate("/login")}>Login</span>
           </p>
         </form>
      

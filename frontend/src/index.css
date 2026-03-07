@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --zenstay-accent: #2bb8bf;
+  --zenstay-accent-dark: #239aa0;
+  --zenstay-accent-shadow: rgba(43, 184, 191, 0.28);
+  --zenstay-accent-shadow-soft: rgba(43, 184, 191, 0.18);
+}
