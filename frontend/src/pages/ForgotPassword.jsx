@@ -17,6 +17,10 @@ function ForgotPassword() {
         const message = String(data?.message || "").toLowerCase()
         return Boolean(data?.identifier) || message.includes("otp")
     }
+    const isLegacyResetLinkResponse = (data) => {
+        const message = String(data?.message || "").toLowerCase()
+        return message.includes("reset link")
+    }
 
     const handleForgotPassword = async (e) => {
         e.preventDefault()
@@ -32,10 +36,15 @@ function ForgotPassword() {
             const result = await axios.post(serverUrl + "/api/auth/forgot-password", requestBody, {
                 timeout: AUTH_REQUEST_TIMEOUT
             })
-            if (!isOtpResponse(result.data)) {
-                throw new Error("Legacy password reset response received. OTP backend is not deployed yet.")
-            }
             setLoading(false)
+            if (isLegacyResetLinkResponse(result.data)) {
+                toast.success(result.data?.message || "Password reset link generated.")
+                toast.info("Check your email for the reset link.")
+                return
+            }
+            if (!isOtpResponse(result.data)) {
+                throw new Error("Unexpected forgot password response received.")
+            }
             toast.success(result.data?.message || "OTP sent successfully")
             if (result.data?.otp) {
                 toast.info(`Dev OTP: ${result.data.otp}`)
