@@ -11,6 +11,14 @@ async function ensureDbConnection() {
 }
 
 export default async function handler(req, res) {
-  await ensureDbConnection();
+  try {
+    await ensureDbConnection();
+  } catch (error) {
+    return res.status(503).json({
+      status: "error",
+      message: "Database connection unavailable",
+      detail: error?.message || "Unknown database error"
+    });
+  }
   return app(req, res);
 }

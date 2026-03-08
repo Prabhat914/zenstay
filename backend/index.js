@@ -11,7 +11,16 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const port = process.env.PORT || 6000;
 
-app.listen(port, async () => {
-  await connectDb();
-  console.log("server started");
-});
+const startServer = async () => {
+  try {
+    await connectDb();
+    app.listen(port, () => {
+      console.log("server started");
+    });
+  } catch (error) {
+    console.error("server bootstrap error", error?.message || error);
+    process.exit(1);
+  }
+};
+
+startServer();
