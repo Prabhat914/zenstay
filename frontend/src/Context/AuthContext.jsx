@@ -2,10 +2,8 @@ import axios from 'axios'
 import React, { createContext, useEffect, useState } from 'react'
 export const authDataContext = createContext()
 function AuthContext({children}) {
-    const rawApiUrl = import.meta.env.VITE_API_URL || ""
-    const fallbackProdApiUrl = "https://zenstay-60a7.onrender.com"
-    const envApiUrl = String(rawApiUrl).trim().replace(/\/+$/, "")
-    const serverUrl = import.meta.env.DEV ? "http://localhost:8000" : (envApiUrl || fallbackProdApiUrl)
+    const prodApiUrl = "https://backend-gray-ten-66.vercel.app"
+    const serverUrl = import.meta.env.DEV ? "http://localhost:8000" : prodApiUrl
 
     let [loading,setLoading]=useState(false)
     const [authToken, setAuthToken] = useState(() => localStorage.getItem("zenstay_token") || "")
