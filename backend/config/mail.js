@@ -1,10 +1,16 @@
 import nodemailer from "nodemailer";
 
-const smtpHost = String(process.env.SMTP_HOST || "").trim();
-const smtpPort = Number(process.env.SMTP_PORT || 587);
-const smtpUser = String(process.env.SMTP_USER || "").trim();
-const smtpPass = String(process.env.SMTP_PASS || "").trim();
-const fromEmail = String(process.env.FROM_EMAIL || smtpUser || "").trim();
+const normalizeEnvValue = (value) => String(value || "")
+  .replace(/^['"]|['"]$/g, "")
+  .replace(/\\r/g, "")
+  .replace(/\\n/g, "")
+  .trim();
+
+const smtpHost = normalizeEnvValue(process.env.SMTP_HOST);
+const smtpPort = Number(normalizeEnvValue(process.env.SMTP_PORT) || 587);
+const smtpUser = normalizeEnvValue(process.env.SMTP_USER);
+const smtpPass = normalizeEnvValue(process.env.SMTP_PASS);
+const fromEmail = normalizeEnvValue(process.env.FROM_EMAIL || smtpUser);
 
 export const hasMailConfig = Boolean(smtpHost && smtpPort && smtpUser && smtpPass && fromEmail);
 
