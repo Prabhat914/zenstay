@@ -4,7 +4,8 @@ export const authDataContext = createContext()
 function AuthContext({children}) {
     const rawApiUrl = import.meta.env.VITE_API_URL || ""
     const fallbackProdApiUrl = "https://zenstay-60a7.onrender.com"
-    const serverUrl = String(rawApiUrl).trim().replace(/\/+$/, "") || (import.meta.env.DEV ? "http://localhost:8000" : fallbackProdApiUrl)
+    const envApiUrl = String(rawApiUrl).trim().replace(/\/+$/, "")
+    const serverUrl = import.meta.env.DEV ? "http://localhost:8000" : (fallbackProdApiUrl || envApiUrl)
 
     let [loading,setLoading]=useState(false)
     const [authToken, setAuthToken] = useState(() => localStorage.getItem("zenstay_token") || "")
