@@ -11,6 +11,11 @@ function ForgotPassword() {
     let [identifier,setIdentifier]= useState("")
     let [loading,setLoading]= useState(false)
 
+    const isOtpResponse = (data) => {
+        const message = String(data?.message || "").toLowerCase()
+        return Boolean(data?.identifier) || message.includes("otp")
+    }
+
     const handleForgotPassword = async (e) => {
         e.preventDefault()
         setLoading(true)
@@ -23,15 +28,24 @@ function ForgotPassword() {
                 requestBody.phone = normalizedIdentifier
             }
             const result = await axios.post(serverUrl + "/api/auth/forgot-password", requestBody)
+            if (!isOtpResponse(result.data)) {
+                throw new Error("Legacy password reset response received. OTP backend is not deployed yet.")
+            }
             setLoading(false)
             toast.success(result.data?.message || "OTP sent successfully")
             if (result.data?.otp) {
                 toast.info(`Dev OTP: ${result.data.otp}`)
             }
-            navigate(`/reset-password?identifier=${encodeURIComponent(identifier)}`)
+            navigate(`/reset-password?identifier=${encodeURIComponent(normalizedIdentifier)}`)
         } catch (error) {
             setLoading(false)
-            toast.error(error?.response?.data?.message || "Unable to process request")
+            const legacyMessage = String(error?.response?.data?.message || error?.message || "")
+            const isLegacyFlow = legacyMessage.toLowerCase().includes("reset link")
+            toast.error(
+                isLegacyFlow
+                    ? "OTP flow is not live on the backend yet. Deploy the latest backend and email config."
+                    : legacyMessage || "Unable to process request"
+            )
         }
     }
 
