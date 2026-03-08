@@ -8,6 +8,8 @@ import { authDataContext } from '../Context/AuthContext';
 import { userDataContext } from '../Context/UserContext';
 import { toast } from 'react-toastify';
 
+const AUTH_REQUEST_TIMEOUT = 10000
+
 function SignUp() {
     let [show,setShow] = useState(false)
     let navigate = useNavigate()
@@ -44,7 +46,7 @@ function SignUp() {
                 mapUrl,
                 password
 
-            },{withCredentials:true})
+            },{withCredentials:true, timeout: AUTH_REQUEST_TIMEOUT})
             setLoading(false)
             const token = result?.data?.token || ""
             const { token: _token, ...userPayload } = result?.data || {}
@@ -59,7 +61,9 @@ function SignUp() {
         } catch (error) {
           setLoading(false)
             console.log(error)
-            const message = error?.response?.data?.message || error?.message || "Something went wrong"
+            const message = error?.code === "ECONNABORTED"
+              ? "Signup request timed out. Backend is slow or unavailable."
+              : error?.response?.data?.message || error?.message || "Something went wrong"
             toast.error(message)
         }
         

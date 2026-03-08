@@ -6,6 +6,8 @@ import axios from 'axios';
 import { authDataContext } from '../Context/AuthContext';
 import { toast } from 'react-toastify';
 
+const AUTH_REQUEST_TIMEOUT = 10000
+
 function ResetPassword() {
     let navigate = useNavigate()
     let [searchParams] = useSearchParams()
@@ -35,6 +37,8 @@ function ResetPassword() {
             }
             const result = await axios.post(serverUrl + `/api/auth/verify-reset-otp`, {
                 ...requestBody
+            }, {
+                timeout: AUTH_REQUEST_TIMEOUT
             })
             setLoading(false)
             setOtpVerified(true)
@@ -42,7 +46,11 @@ function ResetPassword() {
         } catch (error) {
             setLoading(false)
             setOtpVerified(false)
-            toast.error(error?.response?.data?.message || "Unable to verify OTP")
+            toast.error(
+                error?.code === "ECONNABORTED"
+                    ? "OTP verification timed out. Backend is slow or unavailable."
+                    : error?.response?.data?.message || "Unable to verify OTP"
+            )
         }
     }
 
@@ -64,13 +72,19 @@ function ResetPassword() {
             }
             const result = await axios.post(serverUrl + `/api/auth/reset-password`, {
                 ...requestBody
+            }, {
+                timeout: AUTH_REQUEST_TIMEOUT
             })
             setLoading(false)
             toast.success(result.data?.message || "Password reset successful")
             navigate("/login")
         } catch (error) {
             setLoading(false)
-            toast.error(error?.response?.data?.message || "Unable to reset password")
+            toast.error(
+                error?.code === "ECONNABORTED"
+                    ? "Reset password request timed out. Backend is slow or unavailable."
+                    : error?.response?.data?.message || "Unable to reset password"
+            )
         }
     }
 

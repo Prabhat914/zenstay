@@ -8,6 +8,8 @@ import axios from 'axios';
 import { userDataContext } from '../Context/UserContext';
 import { toast } from 'react-toastify';
 
+const AUTH_REQUEST_TIMEOUT = 10000
+
 function Login() {
     let [show,setShow] = useState(false)
     let {serverUrl,setAuthToken} = useContext(authDataContext)
@@ -24,7 +26,7 @@ function Login() {
                     email,
                     password
     
-                },{withCredentials:true})
+                },{withCredentials:true, timeout: AUTH_REQUEST_TIMEOUT})
                 setLoading(false)
                 const token = result?.data?.token || ""
                 const { token: _token, ...userPayload } = result?.data || {}
@@ -39,7 +41,11 @@ function Login() {
             } catch (error) {
                 setLoading(false)
                 console.log(error)
-                toast.error(error.response.data.message)
+                toast.error(
+                    error?.code === "ECONNABORTED"
+                        ? "Login request timed out. Backend is slow or unavailable."
+                        : error?.response?.data?.message || "Unable to login right now."
+                )
 
             }
             

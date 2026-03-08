@@ -5,6 +5,8 @@ import axios from 'axios';
 import { authDataContext } from '../Context/AuthContext';
 import { toast } from 'react-toastify';
 
+const AUTH_REQUEST_TIMEOUT = 10000
+
 function ForgotPassword() {
     let navigate = useNavigate()
     let {serverUrl} = useContext(authDataContext)
@@ -27,7 +29,9 @@ function ForgotPassword() {
             } else {
                 requestBody.phone = normalizedIdentifier
             }
-            const result = await axios.post(serverUrl + "/api/auth/forgot-password", requestBody)
+            const result = await axios.post(serverUrl + "/api/auth/forgot-password", requestBody, {
+                timeout: AUTH_REQUEST_TIMEOUT
+            })
             if (!isOtpResponse(result.data)) {
                 throw new Error("Legacy password reset response received. OTP backend is not deployed yet.")
             }
@@ -39,10 +43,13 @@ function ForgotPassword() {
             navigate(`/reset-password?identifier=${encodeURIComponent(normalizedIdentifier)}`)
         } catch (error) {
             setLoading(false)
+            const isTimeout = error?.code === "ECONNABORTED"
             const legacyMessage = String(error?.response?.data?.message || error?.message || "")
             const isLegacyFlow = legacyMessage.toLowerCase().includes("reset link")
             toast.error(
-                isLegacyFlow
+                isTimeout
+                    ? "Forgot password request timed out. Backend is slow or unavailable."
+                    : isLegacyFlow
                     ? "OTP flow is not live on the backend yet. Deploy the latest backend and email config."
                     : legacyMessage || "Unable to process request"
             )
