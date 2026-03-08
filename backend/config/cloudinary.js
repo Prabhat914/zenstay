@@ -8,10 +8,18 @@ const normalizeEnvValue = (value) => String(value || "")
     .trim()
 
 const uploadOnCloudinary = async (filepath) => {
+    const cloudName = normalizeEnvValue(process.env.CLOUDINARY_CLOUD_NAME)
+    const apiKey = normalizeEnvValue(process.env.CLOUDINARY_API_KEY)
+    const apiSecret = normalizeEnvValue(process.env.CLOUDINARY_API_SECRET)
+
+    if (!cloudName || !apiKey || !apiSecret) {
+        throw new Error("Cloudinary is not configured")
+    }
+
     cloudinary.config({ 
-        cloud_name: normalizeEnvValue(process.env.CLOUDINARY_CLOUD_NAME), 
-        api_key: normalizeEnvValue(process.env.CLOUDINARY_API_KEY), 
-        api_secret: normalizeEnvValue(process.env.CLOUDINARY_API_SECRET)
+        cloud_name: cloudName, 
+        api_key: apiKey, 
+        api_secret: apiSecret
     });
     try {
         if(!filepath){
@@ -26,6 +34,7 @@ const uploadOnCloudinary = async (filepath) => {
     } catch (error) {
         fs.unlinkSync(filepath)
         console.log(error)
+        throw new Error(error?.message || "Cloudinary upload failed")
     }
 }
 
