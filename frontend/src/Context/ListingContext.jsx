@@ -377,6 +377,11 @@ function ListingContext({children}) {
     }
 
     let {serverUrl} = useContext(authDataContext)
+    const buildAuthConfig = () => {
+        const token = localStorage.getItem("zenstay_token") || ""
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        return { withCredentials: true, headers }
+    }
 
     
 
@@ -395,9 +400,10 @@ function ListingContext({children}) {
      formData.append("landMark",landmark)
      formData.append("category",category)
         
-        let result = await axios.post( serverUrl + "/api/listing/add" ,formData, {withCredentials:true}  )
+        let result = await axios.post(serverUrl + "/api/listing/add", formData, buildAuthConfig())
         setAdding(false)
         console.log(result)
+        await getListing()
         navigate("/")
         toast.success("AddListing Successfully")
         setTitle("")
@@ -416,7 +422,7 @@ function ListingContext({children}) {
         } catch (error) {
             setAdding(false)
             console.log(error)
-            toast.error(error.response.data.message)
+            toast.error(error?.response?.data?.message || "Unable to add listing")
         }
         
      }
@@ -525,6 +531,7 @@ function ListingContext({children}) {
         listingsLoading,setListingsLoading,
         handleViewCard,
         cardDetails,setCardDetails,
+        buildAuthConfig,
         updating,setUpdating,
         deleting,setDeleting,handleSearch,searchData,setSearchData
        

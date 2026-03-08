@@ -8,6 +8,9 @@ export const addListing = async (req,res) => {
     try {
         let host = req.userId;
         let {title,description,rent,city,country,landMark,category} = req.body
+        if (!req.files?.image1?.[0] || !req.files?.image2?.[0] || !req.files?.image3?.[0]) {
+            return res.status(400).json({ message: "All three listing images are required" })
+        }
         let image1 = await uploadOnCloudinary(req.files.image1[0].path)
         let image2 = await uploadOnCloudinary(req.files.image2[0].path)
         let image3 = await uploadOnCloudinary(req.files.image3[0].path)
@@ -51,7 +54,7 @@ export const getListing= async (req,res) => {
 export const findListing= async (req,res) => {
     try {
         let {id}= req.params
-        let listing = await Listing.findById(id)
+        let listing = await Listing.findById(id).populate("comments.user","name")
         if(!listing){
             return  res.status(404).json({message:"listing not found"})
         }
@@ -160,4 +163,41 @@ export const search = async (req,res) => {
       return  res.status(500).json({ message: "Internal server error" });
     }
     }
+
+export const addComment = async (req,res) => {
+    try {
+        const { id } = req.params
+        const message = String(req.body?.message || "").trim()
+
+        if (!message) {
+            return res.status(400).json({ message: "Comment message is required" })
+        }
+
+        const listing = await Listing.findById(id)
+        if (!listing) {
+            return res.status(404).json({ message: "Listing not found" })
+        }
+
+        const user = await User.findById(req.userId).select("name")
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        listing.comments.push({
+            user: user._id,
+            userName: user.name,
+            message
+        })
+
+        await listing.save()
+        await listing.populate("comments.user", "name")
+
+        return res.status(201).json({
+            message: "Comment added",
+            comments: listing.comments
+        })
+    } catch (error) {
+        return res.status(500).json({ message: `addComment error ${error}` })
+    }
+}
     

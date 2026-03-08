@@ -61,6 +61,25 @@ const listingSchema = new mongoose.Schema({
         max:5,
         default:0
     },
+    comments:[{
+        user:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"User",
+            required:true
+        },
+        userName:{
+            type:String,
+            required:true
+        },
+        message:{
+            type:String,
+            required:true
+        },
+        createdAt:{
+            type:Date,
+            default:Date.now
+        }
+    }],
     isBooked:{
         type:Boolean,
         default:false

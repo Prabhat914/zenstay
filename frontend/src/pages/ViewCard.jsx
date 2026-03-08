@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 import logoImage from '../assets/zenstay-logo.jpeg'
 function ViewCard() {
     let navigate=useNavigate()
-    let {cardDetails}=useContext(listingDataContext)
+    let {cardDetails, setCardDetails, buildAuthConfig, getListing}=useContext(listingDataContext)
     const fallbackCard = {
         _id: "",
         title: "Zenstay Room",
@@ -29,9 +29,11 @@ function ViewCard() {
         host: ""
     }
     cardDetails = cardDetails || fallbackCard
-    let {userData} = useContext(userDataContext)
+    let {userData, getCurrentUser} = useContext(userDataContext)
     let [updatePopUp,setUpdatePopUp]= useState(false)
     let [bookingPopUp,setBookingPopUp]= useState(false)
+    let [commentMessage,setCommentMessage] = useState("")
+    let [submittingComment,setSubmittingComment] = useState(false)
      let [title,setTitle] = useState(cardDetails.title)
         let [description,setDescription]=useState(cardDetails.description)
         let [backEndImage1,setBackEndImage1]=useState(null)
@@ -45,6 +47,7 @@ function ViewCard() {
         let {deleting,setDeleting} = useContext(listingDataContext)
         let [minDate,setMinDate] = useState("")
         const fallbackImage = logoImage
+        const comments = Array.isArray(cardDetails.comments) ? cardDetails.comments : []
 
         let {checkIn,setCheckIn,
             checkOut,setCheckOut,
@@ -71,7 +74,21 @@ function ViewCard() {
 
             },[checkIn,checkOut,cardDetails.rent,total])
 
-    
+    useEffect(() => {
+        setTitle(cardDetails.title)
+        setDescription(cardDetails.description)
+        setRent(cardDetails.rent)
+        setCity(cardDetails.city)
+        setLandmark(cardDetails.landMark)
+    }, [cardDetails])
+
+    const refreshListingDetails = async () => {
+        const result = await axios.get(serverUrl + `/api/listing/findlistingbyid/${cardDetails._id}`, { withCredentials: true })
+        setCardDetails(result.data)
+        return result.data
+    }
+
+   
 
    
     const handleUpdateListing =async () => {
@@ -89,43 +106,61 @@ function ViewCard() {
      formData.append("landMark",landmark)
     
         
-        let result = await axios.post( serverUrl + `/api/listing/update/${cardDetails._id}` ,formData, {withCredentials:true}  )
+        let result = await axios.post(serverUrl + `/api/listing/update/${cardDetails._id}`, formData, buildAuthConfig())
         setUpdating(false)
         console.log(result)
+        await refreshListingDetails()
+        await getListing()
+        await getCurrentUser()
+        setUpdatePopUp(false)
         toast.success("Lising Updated")
-        navigate("/")
-        setTitle("")
-        setDescription("")
-      
        setBackEndImage1(null)
        setBackEndImage2(null)
        setBackEndImage3(null)
-       setRent("")
-       setCity("")
-       setLandmark("")
        
             
         } catch (error) {
             setUpdating(false)
             console.log(error)
-            toast.error(error.response.data.message)
+            toast.error(error?.response?.data?.message || "Unable to update listing")
         }
         
      }
      const handleDeleteListing = async () => {
         setDeleting(true)
         try {
-            let result = await axios.delete( serverUrl + `/api/listing/delete/${cardDetails._id}`, {withCredentials:true}  )
+            let result = await axios.delete(serverUrl + `/api/listing/delete/${cardDetails._id}`, buildAuthConfig())
             console.log(result.data)
+            await getListing()
+            await getCurrentUser()
             navigate("/")
             toast.success("Listing Delete")
             setDeleting(false)
         } catch (error) {
             console.log(error)
             setDeleting(false)
-            toast.error(error.response.data.message)
+            toast.error(error?.response?.data?.message || "Unable to delete listing")
         }
         
+     }
+     const handleAddComment = async () => {
+        if (!String(commentMessage || "").trim()) {
+            return toast.error("Comment cannot be empty")
+        }
+        setSubmittingComment(true)
+        try {
+            await axios.post(serverUrl + `/api/listing/comment/${cardDetails._id}`, {
+                message: commentMessage
+            }, buildAuthConfig())
+            await refreshListingDetails()
+            setCommentMessage("")
+            toast.success("Comment added")
+        } catch (error) {
+            console.log(error)
+            toast.error(error?.response?.data?.message || "Unable to add comment")
+        } finally {
+            setSubmittingComment(false)
+        }
      }
      const handleImage1 = (e)=>{
         let file = e.target.files[0]
@@ -175,11 +210,38 @@ function ViewCard() {
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px]'>{`${cardDetails.title.toUpperCase()} ${cardDetails.category.toUpperCase()} , ${cardDetails.landMark.toUpperCase()}`}</div>
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px] text-gray-800'>{cardDetails.description}</div>
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px]'>{`Rs.${cardDetails.rent}/day`}</div>
+             <div className='w-[95%] max-w-[900px] flex items-start justify-start flex-col gap-[12px] md:w-[80%] mt-[10px]'>
+                <h2 className='text-[22px] font-semibold'>Comments</h2>
+                <div className='w-[100%] flex flex-col gap-[10px] rounded-lg border border-[#ddd] p-[15px] bg-[#fafafa]'>
+                    <textarea
+                        className='w-[100%] min-h-[100px] border border-[#bbb] rounded-lg px-[14px] py-[10px]'
+                        placeholder='Write your comment here'
+                        value={commentMessage}
+                        onChange={(e)=>setCommentMessage(e.target.value)}
+                    />
+                    <button className='w-fit px-[24px] py-[10px] bg-[red] text-[white] rounded-lg' onClick={handleAddComment} disabled={submittingComment || !userData?._id}>
+                        {submittingComment ? "Posting..." : "Post Comment"}
+                    </button>
+                    {!userData?._id && <p className='text-[14px] text-[#666]'>Login required to add a comment.</p>}
+                </div>
+                <div className='w-[100%] flex flex-col gap-[10px]'>
+                    {comments.length === 0 && <p className='text-[16px] text-[#666]'>No comments yet.</p>}
+                    {comments.map((comment) => (
+                        <div key={comment._id || `${comment.user}-${comment.createdAt}`} className='w-[100%] rounded-lg border border-[#e2e2e2] p-[14px] bg-white'>
+                            <div className='flex items-center justify-between gap-[10px]'>
+                                <span className='font-semibold text-[16px]'>{comment.userName || comment.user?.name || "User"}</span>
+                                <span className='text-[13px] text-[#777]'>{comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}</span>
+                            </div>
+                            <p className='mt-[8px] text-[15px] text-[#333]'>{comment.message}</p>
+                        </div>
+                    ))}
+                </div>
+             </div>
                  
-             <div className='w-[95%] h-[50px] flex items-center justify-start px-[110px]'>{cardDetails.host == userData._id &&<button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg  text-nowrap' onClick={()=>setUpdatePopUp(prev => !prev)}> 
+             <div className='w-[95%] h-[50px] flex items-center justify-start px-[110px]'>{cardDetails.host == userData?._id &&<button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg  text-nowrap' onClick={()=>setUpdatePopUp(prev => !prev)}> 
               Edit listing
              </button>}
-             {cardDetails.host != userData._id && <button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg   text-nowrap' onClick={()=>setBookingPopUp(prev => !prev)}> 
+             {cardDetails.host != userData?._id && <button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg   text-nowrap' onClick={()=>setBookingPopUp(prev => !prev)}> 
                 Reserve
              </button>}
              </div>
