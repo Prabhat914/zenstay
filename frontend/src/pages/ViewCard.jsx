@@ -10,6 +10,9 @@ import { FaStar } from "react-icons/fa";
 import { bookingDataContext } from '../Context/BookingContext';
 import { toast } from 'react-toastify';
 import logoImage from '../assets/zenstay-logo.jpeg'
+
+const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
+
 function ViewCard() {
     let navigate=useNavigate()
     let {cardDetails, setCardDetails, buildAuthConfig, getListing}=useContext(listingDataContext)
@@ -82,6 +85,21 @@ function ViewCard() {
         setLandmark(cardDetails.landMark)
     }, [cardDetails])
 
+    const isLocalListing = String(cardDetails?._id || "").startsWith("local-")
+
+    const saveLocalListingDetails = (nextListing) => {
+        setCardDetails(nextListing)
+        try {
+            const raw = localStorage.getItem(LOCAL_LISTINGS_KEY)
+            const parsed = JSON.parse(raw || "[]")
+            const items = Array.isArray(parsed) ? parsed : []
+            const nextItems = items.map((item) => String(item?._id) === String(nextListing?._id) ? nextListing : item)
+            localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(nextItems))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     const refreshListingDetails = async () => {
         const result = await axios.get(serverUrl + `/api/listing/findlistingbyid/${cardDetails._id}`, { withCredentials: true })
         setCardDetails(result.data)
@@ -143,12 +161,29 @@ function ViewCard() {
         }
         
      }
-     const handleAddComment = async () => {
+    const handleAddComment = async () => {
         if (!String(commentMessage || "").trim()) {
             return toast.error("Comment cannot be empty")
         }
         setSubmittingComment(true)
         try {
+            if (isLocalListing) {
+                const nextComment = {
+                    _id: `local-comment-${Date.now()}`,
+                    user: userData?._id || "local-user",
+                    userName: userData?.name || "User",
+                    message: String(commentMessage || "").trim(),
+                    createdAt: new Date().toISOString()
+                }
+                const nextListing = {
+                    ...cardDetails,
+                    comments: [...comments, nextComment]
+                }
+                saveLocalListingDetails(nextListing)
+                setCommentMessage("")
+                toast.success("Comment added")
+                return
+            }
             await axios.post(serverUrl + `/api/listing/comment/${cardDetails._id}`, {
                 message: commentMessage
             }, buildAuthConfig())
