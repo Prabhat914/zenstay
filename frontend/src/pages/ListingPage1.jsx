@@ -2,6 +2,60 @@ import React, { useContext, useState } from 'react'
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom';
 import { listingDataContext } from '../Context/ListingContext';
+import { toast } from 'react-toastify';
+
+const MAX_IMAGE_DIMENSION = 1600
+const JPEG_QUALITY = 0.8
+const MAX_FILE_SIZE = 4 * 1024 * 1024
+
+const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(new Error("Unable to read image"))
+    reader.readAsDataURL(file)
+})
+
+const loadImage = (src) => new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error("Unable to process image"))
+    image.src = src
+})
+
+const canvasToBlob = (canvas, type, quality) => new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+        if (!blob) {
+            reject(new Error("Unable to compress image"))
+            return
+        }
+        resolve(blob)
+    }, type, quality)
+})
+
+const prepareImageFile = async (file) => {
+    if (!file) {
+        return null
+    }
+    if (file.size <= MAX_FILE_SIZE) {
+        return file
+    }
+
+    const source = await readFileAsDataUrl(file)
+    const image = await loadImage(source)
+    const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(image.width, image.height))
+    const canvas = document.createElement("canvas")
+    canvas.width = Math.max(1, Math.round(image.width * scale))
+    canvas.height = Math.max(1, Math.round(image.height * scale))
+
+    const context = canvas.getContext("2d")
+    context.drawImage(image, 0, 0, canvas.width, canvas.height)
+
+    const blob = await canvasToBlob(canvas, "image/jpeg", JPEG_QUALITY)
+    return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
+        type: "image/jpeg",
+        lastModified: Date.now()
+    })
+}
 
 function ListingPage1() {
    let navigate = useNavigate()
@@ -19,20 +73,35 @@ function ListingPage1() {
     category,setCategory} = useContext(listingDataContext)
     
 
-    const handleImage1 = (e)=>{
-        let file = e.target.files[0]
-        setBackEndImage1(file)
-        setFrontEndImage1(URL.createObjectURL(file))
+    const handleImageChange = async (file, setBackEndImage, setFrontEndImage, inputElement) => {
+        try {
+            const nextFile = await prepareImageFile(file)
+            if (!nextFile) {
+                return
+            }
+            setBackEndImage(nextFile)
+            setFrontEndImage(URL.createObjectURL(nextFile))
+        } catch (error) {
+            if (inputElement) {
+                inputElement.value = ""
+            }
+            toast.error(error?.message || "Unable to prepare image")
+        }
     }
-    const handleImage2 = (e)=>{
+
+    const handleImage1 = async (e)=>{
         let file = e.target.files[0]
-        setBackEndImage2(file)
-        setFrontEndImage2(URL.createObjectURL(file))
+        await handleImageChange(file, setBackEndImage1, setFrontEndImage1, e.target)
     }
-    const handleImage3 = (e)=>{
+
+    const handleImage2 = async (e)=>{
         let file = e.target.files[0]
-        setBackEndImage3(file)
-        setFrontEndImage3(URL.createObjectURL(file))
+        await handleImageChange(file, setBackEndImage2, setFrontEndImage2, e.target)
+    }
+
+    const handleImage3 = async (e)=>{
+        let file = e.target.files[0]
+        await handleImageChange(file, setBackEndImage3, setFrontEndImage3, e.target)
     }
   return (
     <div className='w-[100%] h-[100vh] bg-white flex items-center justify-center relative overflow-auto'>

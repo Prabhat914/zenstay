@@ -7,6 +7,21 @@ import logoImage from '../assets/zenstay-logo.jpeg'
 
 export const listingDataContext = createContext()
 
+const getErrorMessage = (error, fallbackMessage) => {
+    const responseMessage = error?.response?.data?.message
+    if (responseMessage) {
+        return responseMessage
+    }
+    const status = error?.response?.status
+    if (status === 413) {
+        return "Listing images are too large. Please use smaller images and try again."
+    }
+    if (status) {
+        return `Request failed with status ${status}`
+    }
+    return fallbackMessage
+}
+
 function ListingContext({children}) {
     let navigate = useNavigate() 
     let [title,setTitle] = useState("")
@@ -422,7 +437,7 @@ function ListingContext({children}) {
         } catch (error) {
             setAdding(false)
             console.log(error)
-            toast.error(error?.response?.data?.message || "Unable to add listing")
+            toast.error(getErrorMessage(error, "Unable to add listing"))
         }
         
      }
@@ -445,7 +460,7 @@ function ListingContext({children}) {
                 navigate("/viewcard")
                 return
             }
-            toast.error("Unable to open this listing right now.")
+            toast.error(getErrorMessage(error, "Unable to open this listing right now."))
         }
         
      }
@@ -496,7 +511,7 @@ function ListingContext({children}) {
             setListingData(demoListings)
             setNewListData(demoListings)
             if (!didShowFallbackToast.current) {
-                toast.error("Backend listings unavailable, showing demo cards.")
+                toast.error(getErrorMessage(error, "Backend listings unavailable, showing demo cards."))
                 didShowFallbackToast.current = true
             }
             setListingsLoading(false)
