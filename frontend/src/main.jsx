@@ -7,18 +7,21 @@ import AuthContext from './Context/AuthContext.jsx'
 import UserContext from './Context/UserContext.jsx'
 import ListingContext from './Context/ListingContext.jsx'
 import BookingContext from './Context/BookingContext.jsx'
+import AppErrorBoundary from './Component/AppErrorBoundary.jsx'
 
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-  <AuthContext>
-    <UserContext>
-    <ListingContext>
-      <BookingContext>
-    <App />
-    </BookingContext>
-    </ListingContext>
-    </UserContext>
+  <AppErrorBoundary>
+    <AuthContext>
+      <UserContext>
+      <ListingContext>
+        <BookingContext>
+      <App />
+      </BookingContext>
+      </ListingContext>
+      </UserContext>
     </AuthContext>
+  </AppErrorBoundary>
   </BrowserRouter>
 )
