@@ -14,7 +14,7 @@ const categoryItems = [
     {
         key: "trending",
         label: "Trending",
-        image: "https://images.unsplash.com/photo-1613977257360-a3a67f7f25eb?auto=format&fit=crop&w=300&q=80"
+        image: logo
     },
     {
         key: "villa",
