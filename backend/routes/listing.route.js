@@ -4,13 +4,22 @@ import upload from "../middleware/multer.js"
 import { addComment, addListing, deleteListing, findListing, getListing, ratingListing, search, updateListing } from "../controllers/listing.controller.js"
 
 let listingRouter = express.Router()
-
-
-listingRouter.post("/add",isAuth,upload.fields([
+const listingUploadFields = upload.fields([
     {name:"image1",maxCount:1},
     {name:"image2",maxCount:1},
     {name:"image3",maxCount:1}
-]),addListing)
+])
+
+const optionalListingUpload = (req, res, next) => {
+    const contentType = String(req.headers["content-type"] || "").toLowerCase()
+    if (contentType.includes("multipart/form-data")) {
+        return listingUploadFields(req, res, next)
+    }
+    next()
+}
+
+
+listingRouter.post("/add",isAuth,optionalListingUpload,addListing)
 
 listingRouter.get("/get",getListing)
 listingRouter.get("/findlistingbyid/:id",findListing)
@@ -19,10 +28,6 @@ listingRouter.post("/ratings/:id",isAuth,ratingListing)
 listingRouter.post("/comment/:id",isAuth,addComment)
 listingRouter.get("/search",search)
 
-listingRouter.post("/update/:id",isAuth,upload.fields([
-    {name:"image1",maxCount:1},
-    {name:"image2",maxCount:1},
-    {name:"image3",maxCount:1}
-]),updateListing)
+listingRouter.post("/update/:id",isAuth,optionalListingUpload,updateListing)
 
 export default listingRouter

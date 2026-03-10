@@ -2,18 +2,30 @@ import uploadOnCloudinary from "../config/cloudinary.js";
 import Listing from "../model/listing.model.js";
 import User from "../model/user.model.js";
 
+const resolveListingImage = async (req, fieldName) => {
+    const bodyImage = String(req.body?.[fieldName] || "").trim()
+    if (bodyImage) {
+        return bodyImage
+    }
+    const file = req.files?.[fieldName]?.[0]
+    if (file) {
+        return uploadOnCloudinary(file)
+    }
+    return null
+}
 
 
 export const addListing = async (req,res) => {
     try {
         let host = req.userId;
         let {title,description,rent,city,country,landMark,category} = req.body
-        if (!req.files?.image1?.[0] || !req.files?.image2?.[0] || !req.files?.image3?.[0]) {
+        const image1 = await resolveListingImage(req, "image1")
+        const image2 = await resolveListingImage(req, "image2")
+        const image3 = await resolveListingImage(req, "image3")
+
+        if (!image1 || !image2 || !image3) {
             return res.status(400).json({ message: "All three listing images are required" })
         }
-        let image1 = await uploadOnCloudinary(req.files.image1[0])
-        let image2 = await uploadOnCloudinary(req.files.image2[0])
-        let image3 = await uploadOnCloudinary(req.files.image3[0])
 
         let listing = await Listing.create({
             title,
@@ -72,12 +84,12 @@ export const updateListing = async (req,res) => {
         let image3;
         let {id} = req.params;
         let {title,description,rent,city,country,landMark,category} = req.body
-        if(req.files?.image1){
-        image1 = await uploadOnCloudinary(req.files.image1[0])}
-        if(req.files?.image2)
-        {image2 = await uploadOnCloudinary(req.files.image2[0])}
-        if(req.files?.image3){
-        image3 = await uploadOnCloudinary(req.files.image3[0])}
+        if(req.body?.image1 || req.files?.image1){
+        image1 = await resolveListingImage(req, "image1")}
+        if(req.body?.image2 || req.files?.image2)
+        {image2 = await resolveListingImage(req, "image2")}
+        if(req.body?.image3 || req.files?.image3){
+        image3 = await resolveListingImage(req, "image3")}
 
         let listing = await Listing.findByIdAndUpdate(id,{
             title,

@@ -33,6 +33,13 @@ const canvasToBlob = (canvas, type, quality) => new Promise((resolve, reject) =>
     }, type, quality)
 })
 
+const blobToDataUrl = (blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(new Error("Unable to encode image"))
+    reader.readAsDataURL(blob)
+})
+
 const prepareImageFile = async (file) => {
     if (!file) {
         return null
@@ -55,10 +62,7 @@ const prepareImageFile = async (file) => {
         blob = await canvasToBlob(canvas, "image/jpeg", quality)
     }
 
-    return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
-        type: "image/jpeg",
-        lastModified: Date.now()
-    })
+    return await blobToDataUrl(blob)
 }
 
 function ListingPage1() {
@@ -84,7 +88,7 @@ function ListingPage1() {
                 return
             }
             setBackEndImage(nextFile)
-            setFrontEndImage(URL.createObjectURL(nextFile))
+            setFrontEndImage(nextFile)
         } catch (error) {
             if (inputElement) {
                 inputElement.value = ""

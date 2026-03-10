@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import logoImage from '../assets/zenstay-logo.jpeg'
 
 export const listingDataContext = createContext()
-const MAX_LISTING_UPLOAD_SIZE = 1200 * 1024
+const MAX_LISTING_UPLOAD_SIZE = 1600 * 1024
 
 const getErrorMessage = (error, fallbackMessage) => {
     const responseMessage = error?.response?.data?.message
@@ -404,27 +404,28 @@ function ListingContext({children}) {
      const handleAddListing = async () => {
         setAdding(true)
         try {
-            const files = [backEndImage1, backEndImage2, backEndImage3].filter(Boolean)
-            const totalUploadSize = files.reduce((sum, file) => sum + Number(file?.size || 0), 0)
-            if (files.length !== 3) {
+            const images = [backEndImage1, backEndImage2, backEndImage3].filter(Boolean)
+            const totalUploadSize = images.reduce((sum, image) => sum + String(image || "").length, 0)
+            if (images.length !== 3) {
                 throw new Error("All three listing images are required")
             }
             if (totalUploadSize > MAX_LISTING_UPLOAD_SIZE) {
                 throw new Error("Listing images are still too large. Please choose smaller images.")
             }
 
-            let formData = new FormData()
-     formData.append("title",title)
-     formData.append("image1",backEndImage1)
-     formData.append("image2",backEndImage2)
-     formData.append("image3",backEndImage3)
-     formData.append("description",description)
-     formData.append("rent",rent)
-     formData.append("city",city)
-     formData.append("landMark",landmark)
-     formData.append("category",category)
+            const payload = {
+                title,
+                image1: backEndImage1,
+                image2: backEndImage2,
+                image3: backEndImage3,
+                description,
+                rent,
+                city,
+                landMark: landmark,
+                category
+            }
         
-        let result = await axios.post(serverUrl + "/api/listing/add", formData, buildAuthConfig())
+        let result = await axios.post(serverUrl + "/api/listing/add", payload, buildAuthConfig())
         setAdding(false)
         console.log(result)
         await getListing()
