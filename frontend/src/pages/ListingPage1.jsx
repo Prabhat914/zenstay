@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { listingDataContext } from '../Context/ListingContext';
 import { toast } from 'react-toastify';
 
-const MAX_IMAGE_DIMENSION = 1600
-const JPEG_QUALITY = 0.8
-const MAX_FILE_SIZE = 4 * 1024 * 1024
+const MAX_IMAGE_DIMENSION = 1280
+const INITIAL_JPEG_QUALITY = 0.72
+const MIN_JPEG_QUALITY = 0.45
+const TARGET_IMAGE_SIZE = 900 * 1024
 
 const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -36,9 +37,6 @@ const prepareImageFile = async (file) => {
     if (!file) {
         return null
     }
-    if (file.size <= MAX_FILE_SIZE) {
-        return file
-    }
 
     const source = await readFileAsDataUrl(file)
     const image = await loadImage(source)
@@ -50,7 +48,13 @@ const prepareImageFile = async (file) => {
     const context = canvas.getContext("2d")
     context.drawImage(image, 0, 0, canvas.width, canvas.height)
 
-    const blob = await canvasToBlob(canvas, "image/jpeg", JPEG_QUALITY)
+    let quality = INITIAL_JPEG_QUALITY
+    let blob = await canvasToBlob(canvas, "image/jpeg", quality)
+    while (blob.size > TARGET_IMAGE_SIZE && quality > MIN_JPEG_QUALITY) {
+        quality = Math.max(MIN_JPEG_QUALITY, quality - 0.08)
+        blob = await canvasToBlob(canvas, "image/jpeg", quality)
+    }
+
     return new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), {
         type: "image/jpeg",
         lastModified: Date.now()

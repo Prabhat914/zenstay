@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import logoImage from '../assets/zenstay-logo.jpeg'
 
 export const listingDataContext = createContext()
+const MAX_LISTING_UPLOAD_SIZE = 4 * 1024 * 1024
 
 const getErrorMessage = (error, fallbackMessage) => {
     const responseMessage = error?.response?.data?.message
@@ -403,6 +404,14 @@ function ListingContext({children}) {
      const handleAddListing = async () => {
         setAdding(true)
         try {
+            const files = [backEndImage1, backEndImage2, backEndImage3].filter(Boolean)
+            const totalUploadSize = files.reduce((sum, file) => sum + Number(file?.size || 0), 0)
+            if (files.length !== 3) {
+                throw new Error("All three listing images are required")
+            }
+            if (totalUploadSize > MAX_LISTING_UPLOAD_SIZE) {
+                throw new Error("Listing images are still too large. Please choose smaller images.")
+            }
 
             let formData = new FormData()
      formData.append("title",title)
