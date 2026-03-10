@@ -12,13 +12,13 @@ import BookingContext from './Context/BookingContext.jsx'
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
   <AuthContext>
-    <ListingContext>
     <UserContext>
+    <ListingContext>
       <BookingContext>
     <App />
     </BookingContext>
-    </UserContext>
     </ListingContext>
+    </UserContext>
     </AuthContext>
   </BrowserRouter>
 )
