@@ -11,9 +11,9 @@ export const addListing = async (req,res) => {
         if (!req.files?.image1?.[0] || !req.files?.image2?.[0] || !req.files?.image3?.[0]) {
             return res.status(400).json({ message: "All three listing images are required" })
         }
-        let image1 = await uploadOnCloudinary(req.files.image1[0].path)
-        let image2 = await uploadOnCloudinary(req.files.image2[0].path)
-        let image3 = await uploadOnCloudinary(req.files.image3[0].path)
+        let image1 = await uploadOnCloudinary(req.files.image1[0])
+        let image2 = await uploadOnCloudinary(req.files.image2[0])
+        let image3 = await uploadOnCloudinary(req.files.image3[0])
 
         let listing = await Listing.create({
             title,
@@ -37,7 +37,7 @@ export const addListing = async (req,res) => {
        
 
     } catch (error) {
-        return res.status(500).json({message:`AddListing error ${error}`})
+        return res.status(500).json({message:error?.message || `AddListing error ${error}`})
     }
 }
 
@@ -71,12 +71,12 @@ export const updateListing = async (req,res) => {
         let image3;
         let {id} = req.params;
         let {title,description,rent,city,country,landMark,category} = req.body
-        if(req.files.image1){
-        image1 = await uploadOnCloudinary(req.files.image1[0].path)}
-        if(req.files.image2)
-        {image2 = await uploadOnCloudinary(req.files.image2[0].path)}
-        if(req.files.image3){
-        image3 = await uploadOnCloudinary(req.files.image3[0].path)}
+        if(req.files?.image1){
+        image1 = await uploadOnCloudinary(req.files.image1[0])}
+        if(req.files?.image2)
+        {image2 = await uploadOnCloudinary(req.files.image2[0])}
+        if(req.files?.image3){
+        image3 = await uploadOnCloudinary(req.files.image3[0])}
 
         let listing = await Listing.findByIdAndUpdate(id,{
             title,
@@ -96,7 +96,7 @@ export const updateListing = async (req,res) => {
        
 
     } catch (error) {
-        return res.status(500).json({message:`UpdateListing Error ${error}`})
+        return res.status(500).json({message:error?.message || `UpdateListing Error ${error}`})
     }
 }
 
