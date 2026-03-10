@@ -2,7 +2,7 @@ import axios from 'axios'
 import React, { createContext, useEffect, useState } from 'react'
 export const authDataContext = createContext()
 function AuthContext({children}) {
-    const prodApiUrl = import.meta.env.VITE_API_URL || "https://backend-gray-ten-66.vercel.app"
+    const prodApiUrl = import.meta.env.VITE_API_URL || "https://zenstay-backend.vercel.app"
     const serverUrl = import.meta.env.DEV ? "http://localhost:8000" : prodApiUrl
 
     let [loading,setLoading]=useState(false)
