@@ -23,8 +23,7 @@ import RefundPolicy from './pages/RefundPolicy'
 
 
 function App() {
-  let {userData} = useContext(userDataContext)
-  const hasSession = Boolean(userData?._id || localStorage.getItem("zenstay_token"))
+  let {isAuthenticated} = useContext(userDataContext)
  
   return (
     <>
@@ -41,19 +40,19 @@ function App() {
       <Route path='/terms-and-conditions' element={<TermsAndConditions/>}/>
       <Route path='/refund-policy' element={<RefundPolicy/>}/>
       <Route path='/listingpage1' 
-      element={hasSession ? <ListingPage1/>:<Navigate to={"/"}/>}/>
+      element={isAuthenticated ? <ListingPage1/>:<Navigate to={"/"}/>}/>
       <Route path='/listingpage2' 
-      element={hasSession ? <ListingPage2/>:<Navigate to={"/"}/>}/>
+      element={isAuthenticated ? <ListingPage2/>:<Navigate to={"/"}/>}/>
       <Route path='/listingpage3'
-       element={hasSession ? <ListingPage3/>:<Navigate to={"/"}/>}/>
+       element={isAuthenticated ? <ListingPage3/>:<Navigate to={"/"}/>}/>
       <Route path='/mylisting'
-       element={hasSession ? <MyListing/>:<Navigate to={"/"}/>}/>
+       element={isAuthenticated ? <MyListing/>:<Navigate to={"/"}/>}/>
         <Route path='/viewcard'
-        element={hasSession ? <ViewCard/>:<Navigate to={"/"}/>}/>
+        element={isAuthenticated ? <ViewCard/>:<Navigate to={"/"}/>}/>
          <Route path='/mybooking'
-       element={hasSession ? <MyBooking/>:<Navigate to={"/"}/>}/>
+       element={isAuthenticated ? <MyBooking/>:<Navigate to={"/"}/>}/>
        <Route path='/booked'
-       element={hasSession ? <Booked/>:<Navigate to={"/"}/>}/>
+       element={isAuthenticated ? <Booked/>:<Navigate to={"/"}/>}/>
       
 
     </Routes>

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import logo from '../assets/zenstay-logo.jpeg'
-import trendingLogo from '../assets/image.png'
+import trendingLogo from '../assets/trending.png'
 import { FiSearch } from "react-icons/fi";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { CgProfile } from "react-icons/cg";
@@ -61,13 +61,13 @@ const categoryItems = [
 
 function Nav() {
     let [showpopup,setShowpopup]= useState(false)
-    let {userData ,setUserData}= useContext(userDataContext)
+    let {userData ,setUserData, isAuthenticated}= useContext(userDataContext)
     let navigate = useNavigate()
     let {serverUrl,setAuthToken} = useContext(authDataContext)
     let [cate,setCate]= useState()
     let {listingData,setNewListData,searchData,handleSearch,handleViewCard,setSearchData}=useContext(listingDataContext)
     let [input,setInput]=useState("")
-    const hasValidUser = Boolean((userData && typeof userData === "object" && userData._id) || localStorage.getItem("zenstay_token"))
+    const hasValidUser = Boolean(isAuthenticated)
     const handleLogOut = async () => {
         try {
             let result = await axios.post( serverUrl + "/api/auth/logout", {withCredentials:true})
@@ -184,8 +184,8 @@ function Nav() {
                     </button>
                     {showpopup && <div className='w-[220px] h-[250px] absolute bg-slate-50 top-[110%] right-[3%] border-[1px] border-[#aaa9a9] z-10 rounded-lg md:right-[10%]'>
                         <ul className='w-[100%] h-[100%] text-[17px] flex items-start justify-around flex-col py-[10px]'>
-                            {!userData && <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer' onClick={()=>{navigate("/login");setShowpopup(false)}}>Login</li>}
-                            {userData && <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer' onClick={()=>{handleLogOut();setShowpopup(false)}}>Logout</li>}
+                            {!hasValidUser && <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer' onClick={()=>{navigate("/login");setShowpopup(false)}}>Login</li>}
+                            {hasValidUser && <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer' onClick={()=>{handleLogOut();setShowpopup(false)}}>Logout</li>}
                             <div className='w-[100%] h-[1px] bg-[#c1c0c0]'></div>
                             <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer' onClick={()=>openProtectedRoute("/listingpage1")}>List your Home</li>
                             <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer'onClick={()=>openProtectedRoute("/mylisting")}>My Listing</li>
