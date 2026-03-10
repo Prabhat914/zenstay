@@ -28,15 +28,16 @@ export const addListing = async (req,res) => {
             image3,
             host
         })
-        let user = await User.findByIdAndUpdate(host,{$push:{listing:listing._id}},{new:true})
+        let user = await User.findByIdAndUpdate(host,{$addToSet:{listing:listing._id}},{new:true})
 
         if(!user){
-          return  res.status(404).json({message:"user is not found "})
+          return  res.status(404).json({message:"User not found for listing owner"})
         }
         return res.status(201).json(listing)
        
 
     } catch (error) {
+        console.log("addListing error", error)
         return res.status(500).json({message:error?.message || `AddListing error ${error}`})
     }
 }

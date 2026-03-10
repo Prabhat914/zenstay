@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import logoImage from '../assets/zenstay-logo.jpeg'
 
 export const listingDataContext = createContext()
-const MAX_LISTING_UPLOAD_SIZE = 4 * 1024 * 1024
+const MAX_LISTING_UPLOAD_SIZE = 1200 * 1024
 
 const getErrorMessage = (error, fallbackMessage) => {
     const responseMessage = error?.response?.data?.message

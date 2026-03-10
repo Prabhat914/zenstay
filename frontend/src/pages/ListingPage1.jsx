@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { listingDataContext } from '../Context/ListingContext';
 import { toast } from 'react-toastify';
 
-const MAX_IMAGE_DIMENSION = 1280
-const INITIAL_JPEG_QUALITY = 0.72
-const MIN_JPEG_QUALITY = 0.45
-const TARGET_IMAGE_SIZE = 900 * 1024
+const MAX_IMAGE_DIMENSION = 960
+const INITIAL_JPEG_QUALITY = 0.62
+const MIN_JPEG_QUALITY = 0.32
+const TARGET_IMAGE_SIZE = 320 * 1024
 
 const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader()
