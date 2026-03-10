@@ -1,12 +1,14 @@
 import axios from 'axios'
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { authDataContext } from './AuthContext'
+import { userDataContext } from './UserContext'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import logoImage from '../assets/zenstay-logo.jpeg'
 
 export const listingDataContext = createContext()
 const MAX_LISTING_UPLOAD_SIZE = 1600 * 1024
+const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 
 const listingImageFallbacks = {
     villa: ["/villas/OIP.jpeg", "/villas/OIP (1).jpeg", "/villas/OIP (2).jpeg"],
@@ -48,6 +50,7 @@ const getErrorMessage = (error, fallbackMessage) => {
 
 function ListingContext({children}) {
     let navigate = useNavigate() 
+    let { userData, setUserData } = useContext(userDataContext)
     let [title,setTitle] = useState("")
     let [description,setDescription]=useState("")
     let [frontEndImage1,setFrontEndImage1]=useState(null)
@@ -422,6 +425,31 @@ function ListingContext({children}) {
         return { withCredentials: true, headers }
     }
 
+    const getStoredLocalListings = () => {
+        try {
+            const raw = localStorage.getItem(LOCAL_LISTINGS_KEY)
+            const parsed = JSON.parse(raw || "[]")
+            return Array.isArray(parsed) ? parsed : []
+        } catch {
+            return []
+        }
+    }
+
+    const persistLocalListing = (listing) => {
+        const currentLocalListings = getStoredLocalListings()
+        const nextLocalListings = [listing, ...currentLocalListings.filter((item) => String(item?._id) !== String(listing?._id))]
+        localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(nextLocalListings))
+        setListingData((prev) => [listing, ...(prev || []).filter((item) => String(item?._id) !== String(listing?._id))])
+        setNewListData((prev) => [listing, ...(prev || []).filter((item) => String(item?._id) !== String(listing?._id))])
+        const nextUser = userData && typeof userData === "object"
+            ? { ...userData, listing: [listing, ...(((userData.listing) || []).filter((item) => String(item?._id) !== String(listing?._id)))] }
+            : null
+        if (nextUser) {
+            setUserData(nextUser)
+            localStorage.setItem("zenstay_user", JSON.stringify(nextUser))
+        }
+    }
+
     const resetListingForm = () => {
         setTitle("")
         setDescription("")
@@ -472,15 +500,43 @@ function ListingContext({children}) {
         try {
             result = await axios.post(serverUrl + "/api/listing/add", payload, buildAuthConfig())
         } catch (primaryError) {
-            const [fallbackImage1, fallbackImage2, fallbackImage3] = getFallbackImagesForCategory(category)
-            const fallbackPayload = {
-                ...payload,
-                image1: fallbackImage1,
-                image2: fallbackImage2,
-                image3: fallbackImage3
+            try {
+                const [fallbackImage1, fallbackImage2, fallbackImage3] = getFallbackImagesForCategory(category)
+                const fallbackPayload = {
+                    ...payload,
+                    image1: fallbackImage1,
+                    image2: fallbackImage2,
+                    image3: fallbackImage3
+                }
+                result = await axios.post(serverUrl + "/api/listing/add", fallbackPayload, buildAuthConfig())
+                toast.info("Listing added with fallback images.")
+            } catch (fallbackError) {
+                const [fallbackImage1, fallbackImage2, fallbackImage3] = getFallbackImagesForCategory(category)
+                const localListing = {
+                    _id: `local-${Date.now()}`,
+                    title,
+                    description,
+                    rent: Number(rent || 0),
+                    city,
+                    country: "",
+                    landMark: landmark,
+                    category,
+                    image1: fallbackImage1,
+                    image2: fallbackImage2,
+                    image3: fallbackImage3,
+                    host: userData?._id || "local-user",
+                    ratings: 0,
+                    isBooked: false,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                }
+                persistLocalListing(localListing)
+                setAdding(false)
+                navigate("/")
+                toast.success("Listing saved locally.")
+                resetListingForm()
+                return
             }
-            result = await axios.post(serverUrl + "/api/listing/add", fallbackPayload, buildAuthConfig())
-            toast.info("Listing added with fallback images.")
         }
         setAdding(false)
         console.log(result)
@@ -542,12 +598,14 @@ function ListingContext({children}) {
 
      const getListing = async () => {
         setListingsLoading(true)
+        const localListings = getStoredLocalListings()
         try {
             let result = await axios.get( serverUrl + "/api/listing/get",{withCredentials:true, timeout: 6000})
             const items = Array.isArray(result.data) ? result.data : []
             if (items.length === 0) {
-                setListingData(demoListings)
-                setNewListData(demoListings)
+                const mergedEmptyItems = mergeListings(localListings)
+                setListingData(mergedEmptyItems)
+                setNewListData(mergedEmptyItems)
                 if (!didShowFallbackToast.current) {
                     toast.info("No backend listings found yet, showing demo cards.")
                     didShowFallbackToast.current = true
@@ -555,7 +613,7 @@ function ListingContext({children}) {
                 setListingsLoading(false)
                 return
             }
-            const mergedItems = mergeListings(items)
+            const mergedItems = mergeListings([...(localListings || []), ...items])
             setListingData(mergedItems)
             setNewListData(mergedItems)
             didShowFallbackToast.current = false
@@ -563,8 +621,9 @@ function ListingContext({children}) {
 
         } catch (error) {
             console.log(error)
-            setListingData(demoListings)
-            setNewListData(demoListings)
+            const mergedFallbackItems = mergeListings(localListings)
+            setListingData(mergedFallbackItems)
+            setNewListData(mergedFallbackItems)
             if (!didShowFallbackToast.current) {
                 toast.error(getErrorMessage(error, "Backend listings unavailable, showing demo cards."))
                 didShowFallbackToast.current = true

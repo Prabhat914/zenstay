@@ -7,6 +7,7 @@ import authRouter from "./routes/auth.route.js";
 import bookingRouter from "./routes/booking.route.js";
 import legalRouter from "./routes/legal.route.js";
 import contactRouter from "./routes/contact.route.js";
+import backendPackage from "./package.json" with { type: "json" };
 
 const app = express();
 
@@ -56,7 +57,11 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "healthy" });
+  res.status(200).json({
+    status: "healthy",
+    version: backendPackage.version,
+    release: process.env.APP_RELEASE || "dev-local-json-upload"
+  });
 });
 
 app.use((error, req, res, next) => {
