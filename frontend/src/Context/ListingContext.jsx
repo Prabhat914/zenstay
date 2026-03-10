@@ -50,7 +50,8 @@ const getErrorMessage = (error, fallbackMessage) => {
 
 function ListingContext({children}) {
     let navigate = useNavigate() 
-    let { userData, setUserData } = useContext(userDataContext)
+    const userContextValue = useContext(userDataContext) || {}
+    let { userData = null, setUserData = () => {} } = userContextValue
     let [title,setTitle] = useState("")
     let [description,setDescription]=useState("")
     let [frontEndImage1,setFrontEndImage1]=useState(null)

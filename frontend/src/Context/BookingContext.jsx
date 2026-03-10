@@ -12,12 +12,19 @@ function BookingContext({children}) {
     let [total,setTotal]=useState(0)
     let [night,setNight]=useState(0)
     let {serverUrl} = useContext(authDataContext)
-    let {getCurrentUser,userData} = useContext(userDataContext)
-    let {getListing} = useContext(listingDataContext)
+    const userContextValue = useContext(userDataContext) || {}
+    const listingContextValue = useContext(listingDataContext) || {}
+    let {getCurrentUser = async () => {}, userData = null} = userContextValue
+    let {getListing = async () => {}} = listingContextValue
     let [bookingData,setBookingData]= useState([])
     let [myBookings,setMyBookings]= useState([])
     let [booking,setbooking]= useState(false)
     let navigate = useNavigate()
+    const buildAuthConfig = () => {
+        const token = localStorage.getItem("zenstay_token") || ""
+        const headers = token ? { Authorization: `Bearer ${token}` } : {}
+        return { withCredentials: true, headers }
+    }
 
     const loadRazorpayScript = () => {
         return new Promise((resolve) => {
@@ -42,7 +49,7 @@ function BookingContext({children}) {
             try {
                 orderResult = await axios.post(serverUrl + `/api/booking/create-order/${id}`, {
                     checkIn,checkOut,totalRent:total
-                },{withCredentials:true})
+                },buildAuthConfig())
             } catch (orderError) {
                 throw orderError
             }
@@ -69,7 +76,7 @@ function BookingContext({children}) {
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_signature: response.razorpay_signature
-                    }, { withCredentials: true })
+                    }, buildAuthConfig())
 
                     await getCurrentUser()
                     await getListing()
@@ -104,7 +111,7 @@ function BookingContext({children}) {
     }
     const cancelBooking = async (id) => {
         try {
-            let result = await axios.delete( serverUrl + `/api/booking/cancel/${id}`,{withCredentials:true})
+            let result = await axios.delete( serverUrl + `/api/booking/cancel/${id}`,buildAuthConfig())
         await getCurrentUser()
         await getListing()
         console.log(result.data)
@@ -120,7 +127,7 @@ function BookingContext({children}) {
 
     const getMyBookings = async () => {
         try {
-            const result = await axios.get(serverUrl + "/api/booking/my", { withCredentials: true })
+            const result = await axios.get(serverUrl + "/api/booking/my", buildAuthConfig())
             setMyBookings(result.data || [])
         } catch (error) {
             console.log(error)
@@ -130,7 +137,7 @@ function BookingContext({children}) {
 
     const cancelBookingByBookingId = async (bookingId) => {
         try {
-            await axios.delete(serverUrl + `/api/booking/cancel-booking/${bookingId}`, { withCredentials: true })
+            await axios.delete(serverUrl + `/api/booking/cancel-booking/${bookingId}`, buildAuthConfig())
             await getCurrentUser()
             await getListing()
             await getMyBookings()
@@ -147,7 +154,7 @@ function BookingContext({children}) {
                 checkIn,
                 checkOut,
                 listingId
-            }, { withCredentials: true })
+            }, buildAuthConfig())
             await getCurrentUser()
             await getListing()
             await getMyBookings()
