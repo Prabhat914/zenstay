@@ -2,6 +2,29 @@ import uploadOnCloudinary from "../config/cloudinary.js";
 import Listing from "../model/listing.model.js";
 import User from "../model/user.model.js";
 
+const listingImageFallbacks = {
+    villa: ["/villas/OIP.jpeg", "/villas/OIP (1).jpeg", "/villas/OIP (2).jpeg"],
+    farmHouse: ["/farm-house/image.png", "/farm-house/DOC1684492990616.jpg", "/farm-house/home1548666759.avif"],
+    poolHouse: [
+        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?auto=format&fit=crop&w=1200&q=80"
+    ],
+    rooms: [
+        "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1616594039964-3f2b9dd2f7ab?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80"
+    ],
+    flat: ["/villas/image.png", "/villas/OIP.jpeg", "/villas/OIP (3).jpeg"],
+    pg: ["/farm-house/image.png", "/villas/OIP (2).jpeg", "/villas/OIP.jpeg"],
+    cabin: ["/farm-house/home1548666759.avif", "/farm-house/chhattarpur farm, delhi.avif", "/farm-house/OIP (4).jpeg"],
+    shops: [
+        "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1561715276-a2d087060f1d?auto=format&fit=crop&w=1200&q=80"
+    ]
+}
+
 const resolveListingImage = async (req, fieldName) => {
     const bodyImage = String(req.body?.[fieldName] || "").trim()
     if (bodyImage) {
@@ -14,18 +37,23 @@ const resolveListingImage = async (req, fieldName) => {
     return null
 }
 
+const getFallbackListingImages = (category) => {
+    const normalizedCategory = String(category || "").trim()
+    return listingImageFallbacks[normalizedCategory] || listingImageFallbacks.villa
+}
+
 
 export const addListing = async (req,res) => {
     try {
         let host = req.userId;
         let {title,description,rent,city,country,landMark,category} = req.body
-        const image1 = await resolveListingImage(req, "image1")
-        const image2 = await resolveListingImage(req, "image2")
-        const image3 = await resolveListingImage(req, "image3")
-
-        if (!image1 || !image2 || !image3) {
-            return res.status(400).json({ message: "All three listing images are required" })
-        }
+        let image1 = await resolveListingImage(req, "image1")
+        let image2 = await resolveListingImage(req, "image2")
+        let image3 = await resolveListingImage(req, "image3")
+        const [fallbackImage1, fallbackImage2, fallbackImage3] = getFallbackListingImages(category)
+        image1 = image1 || fallbackImage1
+        image2 = image2 || fallbackImage2
+        image3 = image3 || fallbackImage3
 
         let listing = await Listing.create({
             title,
