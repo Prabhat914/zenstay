@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import logo from '../assets/zenstay-logo.jpeg'
+import trendingLogo from '../assets/image.png'
 import { FiSearch } from "react-icons/fi";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { CgProfile } from "react-icons/cg";
@@ -14,7 +15,7 @@ const categoryItems = [
     {
         key: "trending",
         label: "Trending",
-        image: logo
+        image: trendingLogo
     },
     {
         key: "villa",
