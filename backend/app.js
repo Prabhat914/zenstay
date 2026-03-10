@@ -10,7 +10,8 @@ import contactRouter from "./routes/contact.route.js";
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "6mb" }));
+app.use(express.urlencoded({ extended: true, limit: "6mb" }));
 app.use(cookieParser());
 
 const allowedOrigins = [
@@ -56,6 +57,21 @@ app.get("/", (req, res) => {
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "healthy" });
+});
+
+app.use((error, req, res, next) => {
+  if (error?.type === "entity.too.large") {
+    return res.status(413).json({
+      message: "Listing payload is too large. Please use smaller images."
+    });
+  }
+  if (error) {
+    console.error("app middleware error", error);
+    return res.status(error.status || 500).json({
+      message: error?.message || "Internal server error"
+    });
+  }
+  next();
 });
 
 export default app;
