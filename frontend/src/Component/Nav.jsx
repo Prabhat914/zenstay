@@ -66,7 +66,7 @@ function Nav() {
     let [cate,setCate]= useState()
     let {listingData,setNewListData,searchData,handleSearch,handleViewCard,setSearchData}=useContext(listingDataContext)
     let [input,setInput]=useState("")
-    const hasValidUser = userData && typeof userData === "object"
+    const hasValidUser = Boolean((userData && typeof userData === "object" && userData._id) || localStorage.getItem("zenstay_token"))
     const handleLogOut = async () => {
         try {
             let result = await axios.post( serverUrl + "/api/auth/logout", {withCredentials:true})

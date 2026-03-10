@@ -52,6 +52,7 @@ function SignUp() {
             const { token: _token, ...userPayload } = result?.data || {}
             setUserData(userPayload)
             setAuthToken(token)
+            localStorage.setItem("zenstay_user", JSON.stringify(userPayload))
             if (token) {
               localStorage.setItem("zenstay_token", token)
             }
