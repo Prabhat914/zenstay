@@ -451,6 +451,31 @@ function ListingContext({children}) {
         }
     }
 
+    const syncLocalListing = (listing) => {
+        persistLocalListing(listing)
+        if (String(cardDetails?._id) === String(listing?._id)) {
+            setCardDetails(listing)
+        }
+    }
+
+    const deleteLocalListing = (listingId) => {
+        const nextLocalListings = getStoredLocalListings().filter((item) => String(item?._id) !== String(listingId))
+        localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(nextLocalListings))
+        setListingData((prev) => (prev || []).filter((item) => String(item?._id) !== String(listingId)))
+        setNewListData((prev) => (prev || []).filter((item) => String(item?._id) !== String(listingId)))
+        if (userData && typeof userData === "object") {
+            const nextUser = {
+                ...userData,
+                listing: ((userData.listing) || []).filter((item) => String(item?._id) !== String(listingId))
+            }
+            setUserData(nextUser)
+            localStorage.setItem("zenstay_user", JSON.stringify(nextUser))
+        }
+        if (String(cardDetails?._id) === String(listingId)) {
+            setCardDetails(null)
+        }
+    }
+
     const resetListingForm = () => {
         setTitle("")
         setDescription("")
@@ -662,6 +687,8 @@ function ListingContext({children}) {
         handleViewCard,
         cardDetails,setCardDetails,
         buildAuthConfig,
+        syncLocalListing,
+        deleteLocalListing,
         updating,setUpdating,
         deleting,setDeleting,handleSearch,searchData,setSearchData
        

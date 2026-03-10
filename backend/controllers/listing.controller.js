@@ -241,4 +241,33 @@ export const addComment = async (req,res) => {
         return res.status(500).json({ message: `addComment error ${error}` })
     }
 }
+
+export const deleteComment = async (req,res) => {
+    try {
+        const { id, commentId } = req.params
+        const listing = await Listing.findById(id)
+        if (!listing) {
+            return res.status(404).json({ message: "Listing not found" })
+        }
+
+        const comment = listing.comments.id(commentId)
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" })
+        }
+        if (String(comment.user) !== String(req.userId)) {
+            return res.status(403).json({ message: "You can delete only your own comment" })
+        }
+
+        comment.deleteOne()
+        await listing.save()
+        await listing.populate("comments.user", "name")
+
+        return res.status(200).json({
+            message: "Comment deleted",
+            comments: listing.comments
+        })
+    } catch (error) {
+        return res.status(500).json({ message: `deleteComment error ${error}` })
+    }
+}
     

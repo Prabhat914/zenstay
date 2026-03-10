@@ -15,7 +15,7 @@ const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 
 function ViewCard() {
     let navigate=useNavigate()
-    let {cardDetails, setCardDetails, buildAuthConfig, getListing}=useContext(listingDataContext)
+    let {cardDetails, setCardDetails, buildAuthConfig, getListing, syncLocalListing, deleteLocalListing}=useContext(listingDataContext)
     const fallbackCard = {
         _id: "",
         title: "Zenstay Room",
@@ -88,16 +88,7 @@ function ViewCard() {
     const isLocalListing = String(cardDetails?._id || "").startsWith("local-")
 
     const saveLocalListingDetails = (nextListing) => {
-        setCardDetails(nextListing)
-        try {
-            const raw = localStorage.getItem(LOCAL_LISTINGS_KEY)
-            const parsed = JSON.parse(raw || "[]")
-            const items = Array.isArray(parsed) ? parsed : []
-            const nextItems = items.map((item) => String(item?._id) === String(nextListing?._id) ? nextListing : item)
-            localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(nextItems))
-        } catch (error) {
-            console.log(error)
-        }
+        syncLocalListing(nextListing)
     }
 
     const refreshListingDetails = async () => {
@@ -147,6 +138,13 @@ function ViewCard() {
      const handleDeleteListing = async () => {
         setDeleting(true)
         try {
+            if (isLocalListing) {
+                deleteLocalListing(cardDetails._id)
+                navigate("/")
+                toast.success("Listing deleted")
+                setDeleting(false)
+                return
+            }
             let result = await axios.delete(serverUrl + `/api/listing/delete/${cardDetails._id}`, buildAuthConfig())
             console.log(result.data)
             await getListing()
@@ -195,6 +193,26 @@ function ViewCard() {
             toast.error(error?.response?.data?.message || "Unable to add comment")
         } finally {
             setSubmittingComment(false)
+        }
+     }
+
+     const handleDeleteComment = async (commentId) => {
+        try {
+            if (isLocalListing) {
+                const nextListing = {
+                    ...cardDetails,
+                    comments: comments.filter((comment) => String(comment?._id) !== String(commentId))
+                }
+                saveLocalListingDetails(nextListing)
+                toast.success("Comment deleted")
+                return
+            }
+            const result = await axios.delete(serverUrl + `/api/listing/comment/${cardDetails._id}/${commentId}`, buildAuthConfig())
+            setCardDetails((prev) => ({ ...(prev || {}), comments: result.data?.comments || [] }))
+            toast.success("Comment deleted")
+        } catch (error) {
+            console.log(error)
+            toast.error(error?.response?.data?.message || "Unable to delete comment")
         }
      }
      const handleImage1 = (e)=>{
@@ -265,7 +283,14 @@ function ViewCard() {
                         <div key={comment._id || `${comment.user}-${comment.createdAt}`} className='w-[100%] rounded-lg border border-[#e2e2e2] p-[14px] bg-white'>
                             <div className='flex items-center justify-between gap-[10px]'>
                                 <span className='font-semibold text-[16px]'>{comment.userName || comment.user?.name || "User"}</span>
-                                <span className='text-[13px] text-[#777]'>{comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}</span>
+                                <div className='flex items-center gap-[10px]'>
+                                    <span className='text-[13px] text-[#777]'>{comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}</span>
+                                    {String(comment.user?._id || comment.user) === String(userData?._id) && (
+                                        <button className='text-[13px] text-[red]' onClick={()=>handleDeleteComment(comment._id)}>
+                                            Delete
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                             <p className='mt-[8px] text-[15px] text-[#333]'>{comment.message}</p>
                         </div>
@@ -273,8 +298,11 @@ function ViewCard() {
                 </div>
              </div>
                  
-             <div className='w-[95%] h-[50px] flex items-center justify-start px-[110px]'>{cardDetails.host == userData?._id &&<button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg  text-nowrap' onClick={()=>setUpdatePopUp(prev => !prev)}> 
+             <div className='w-[95%] h-[50px] flex items-center justify-start gap-[15px] px-[110px]'>{cardDetails.host == userData?._id &&<button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg  text-nowrap' onClick={()=>setUpdatePopUp(prev => !prev)}> 
               Edit listing
+             </button>}
+             {cardDetails.host == userData?._id && <button className='px-[30px] py-[10px] bg-black text-[white] text-[18px] md:px-[100px] rounded-lg text-nowrap' onClick={handleDeleteListing} disabled={deleting}>
+                {deleting ? "Deleting..." : "Delete listing"}
              </button>}
              {cardDetails.host != userData?._id && <button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg   text-nowrap' onClick={()=>setBookingPopUp(prev => !prev)}> 
                 Reserve
