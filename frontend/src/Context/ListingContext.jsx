@@ -8,6 +8,29 @@ import logoImage from '../assets/zenstay-logo.jpeg'
 export const listingDataContext = createContext()
 const MAX_LISTING_UPLOAD_SIZE = 1600 * 1024
 
+const listingImageFallbacks = {
+    villa: ["/villas/OIP.jpeg", "/villas/OIP (1).jpeg", "/villas/OIP (2).jpeg"],
+    farmHouse: ["/farm-house/image.png", "/farm-house/DOC1684492990616.jpg", "/farm-house/home1548666759.avif"],
+    poolHouse: [
+        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?auto=format&fit=crop&w=1200&q=80"
+    ],
+    rooms: [
+        "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1616594039964-3f2b9dd2f7ab?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80"
+    ],
+    flat: ["/villas/image.png", "/villas/OIP.jpeg", "/villas/OIP (3).jpeg"],
+    pg: ["/farm-house/image.png", "/villas/OIP (2).jpeg", "/villas/OIP.jpeg"],
+    cabin: ["/farm-house/home1548666759.avif", "/farm-house/chhattarpur farm, delhi.avif", "/farm-house/OIP (4).jpeg"],
+    shops: [
+        "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1561715276-a2d087060f1d?auto=format&fit=crop&w=1200&q=80"
+    ]
+}
+
 const getErrorMessage = (error, fallbackMessage) => {
     const responseMessage = error?.response?.data?.message
     if (responseMessage) {
@@ -399,6 +422,26 @@ function ListingContext({children}) {
         return { withCredentials: true, headers }
     }
 
+    const resetListingForm = () => {
+        setTitle("")
+        setDescription("")
+        setFrontEndImage1(null)
+        setFrontEndImage2(null)
+        setFrontEndImage3(null)
+        setBackEndImage1(null)
+        setBackEndImage2(null)
+        setBackEndImage3(null)
+        setRent("")
+        setCity("")
+        setLandmark("")
+        setCategory("")
+    }
+
+    const getFallbackImagesForCategory = (selectedCategory) => {
+        const normalizedCategory = String(selectedCategory || "").trim()
+        return listingImageFallbacks[normalizedCategory] || listingImageFallbacks.villa
+    }
+
     
 
      const handleAddListing = async () => {
@@ -424,25 +467,27 @@ function ListingContext({children}) {
                 landMark: landmark,
                 category
             }
-        
-        let result = await axios.post(serverUrl + "/api/listing/add", payload, buildAuthConfig())
+
+        let result
+        try {
+            result = await axios.post(serverUrl + "/api/listing/add", payload, buildAuthConfig())
+        } catch (primaryError) {
+            const [fallbackImage1, fallbackImage2, fallbackImage3] = getFallbackImagesForCategory(category)
+            const fallbackPayload = {
+                ...payload,
+                image1: fallbackImage1,
+                image2: fallbackImage2,
+                image3: fallbackImage3
+            }
+            result = await axios.post(serverUrl + "/api/listing/add", fallbackPayload, buildAuthConfig())
+            toast.info("Listing added with fallback images.")
+        }
         setAdding(false)
         console.log(result)
         await getListing()
         navigate("/")
         toast.success("AddListing Successfully")
-        setTitle("")
-        setDescription("")
-       setFrontEndImage1(null)
-       setFrontEndImage2(null)
-       setFrontEndImage3(null)
-       setBackEndImage1(null)
-       setBackEndImage2(null)
-       setBackEndImage3(null)
-       setRent("")
-       setCity("")
-       setLandmark("")
-       setCategory("")
+        resetListingForm()
             
         } catch (error) {
             setAdding(false)
