@@ -4,9 +4,10 @@ import bcrypt from "bcryptjs"
 import crypto from "crypto"
 import { hasMailConfig, sendOtpEmail } from "../config/mail.js"
 import { hasSmsConfig, sendOtpSms } from "../config/sms.js"
+import { isAdminUser } from "../utils/access.js"
 
 const buildCookieOptions = () => {
-    const isProduction = process.env.NODE_ENVIRONMENT === "production"
+    const isProduction = process.env.NODE_ENV === "production"
     return {
         httpOnly: true,
         secure: isProduction,
@@ -20,10 +21,12 @@ const serializeUser = (userDoc) => {
     delete obj.phoneOtp
     delete obj.resetPasswordOtp
     delete obj.resetPasswordOtpExpire
+    obj.isAdmin = isAdminUser(obj)
     return obj
 }
 const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000))
 const normalizePhone = (value) => String(value || "").replace(/[^\d+]/g, "").trim()
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const findUserByIdentifier = async (identifier) => {
     const value = String(identifier || "").trim()
     if (!value) return null
@@ -33,11 +36,33 @@ const findUserByIdentifier = async (identifier) => {
     return User.findOne({ phone: normalizePhone(value) })
 }
 
-export const sighUp=async (req,res) => {
+const sendSignupOtp = async ({ email, otp }) => {
+    if (hasMailConfig) {
+        await sendOtpEmail({
+            toEmail: email,
+            otp,
+            subject: "Zenstay signup verification OTP",
+            heading: "Verify your Zenstay account",
+            intro: "Use this OTP to complete your signup:"
+        })
+    }
+}
+
+export const signUp=async (req,res) => {
     try {
         let {name,email,phone,password,location,country,mapUrl} = req.body
+        email = String(email || "").trim().toLowerCase()
+        if (!String(name || "").trim()) {
+            return res.status(400).json({message:"Name is required"})
+        }
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({message:"Valid email is required"})
+        }
+        if (!password || String(password).length < 6) {
+            return res.status(400).json({message:"Password must be at least 6 characters"})
+        }
         let existUser = await User.findOne({email})
-        if(existUser){
+        if(existUser?.isVerified){
             return res.status(400).json({message:"User is already exist"})
         }
         const normalizedPhone = normalizePhone(phone)
@@ -45,26 +70,52 @@ export const sighUp=async (req,res) => {
             return res.status(400).json({message:"Phone number is required"})
         }
         let existPhone = await User.findOne({ phone: normalizedPhone })
-        if(existPhone){
+        if(existPhone && String(existPhone._id) !== String(existUser?._id || "")){
             return res.status(400).json({message:"Phone number is already exist"})
         }
         let hashPassword = await bcrypt.hash(password,10)
-        let user = await User.create({
-            name,
+        const otp = generateOtp()
+        const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex")
+        const payload = {
+            name: String(name || "").trim(),
             email,
             phone: normalizedPhone,
             password:hashPassword,
             location: String(location || "").trim(),
             country: String(country || "").trim(),
-            mapUrl: String(mapUrl || "").trim()
-        })
-        let token = await genToken(user._id)
-        res.cookie("token",token,buildCookieOptions())
-        const safeUser = serializeUser(user)
-        return res.status(201).json({ ...safeUser, token })
+            mapUrl: String(mapUrl || "").trim(),
+            isVerified: false,
+            signupOtp: hashedOtp,
+            signupOtpExpire: Date.now() + 10 * 60 * 1000
+        }
+
+        let user
+        if (existUser && !existUser.isVerified) {
+            Object.assign(existUser, payload)
+            user = await existUser.save()
+        } else {
+            user = await User.create(payload)
+        }
+
+        if (!hasMailConfig && process.env.NODE_ENV === "production") {
+            return res.status(500).json({message:"Signup email service is not configured"})
+        }
+
+        await sendSignupOtp({ email: user.email, otp })
+
+        const response = {
+            message: hasMailConfig ? "Verification OTP sent to your email." : "Verification OTP generated successfully.",
+            email: user.email,
+            requiresVerification: true
+        }
+        if (!hasMailConfig) {
+            response.otp = otp
+        }
+
+        return res.status(201).json(response)
 
     } catch (error) {
-        return res.status(500).json({message:`sighup error ${error}`})
+        return res.status(500).json({message:`signup error ${error}`})
     }
     
 }
@@ -74,6 +125,9 @@ export const login = async (req,res) => {
         let user= await User.findOne({email}).populate("listing","title image1 image2 image3 description rent category city landMark")
         if(!user){
             return res.status(400).json({message:"User is not exist"})
+        }
+        if (user.isVerified === false) {
+            return res.status(403).json({message:"Please verify your email before logging in"})
         }
         let isMatch = await bcrypt.compare(password,user.password)
         if(!isMatch){
@@ -91,10 +145,86 @@ export const login = async (req,res) => {
 }
 export const logOut = async (req,res) => {
     try {
-        res.clearCookie("token", buildCookieOptions())
+        const options = buildCookieOptions()
+        delete options.maxAge
+        res.clearCookie("token", options)
         return res.status(200).json({message:"Logout Successfully"})
     } catch (error) {
         return res.status(500).json({message:`logout error ${error}`})
+    }
+}
+
+export const verifySignupOtp = async (req,res) => {
+    try {
+        const email = String(req.body?.email || "").trim().toLowerCase()
+        const otp = String(req.body?.otp || "").trim()
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP are required" })
+        }
+
+        const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex")
+        const user = await User.findOne({
+            email,
+            signupOtp: hashedOtp,
+            signupOtpExpire: { $gt: Date.now() }
+        }).populate("listing","title image1 image2 image3 description rent category city landMark")
+
+        if (!user) {
+            return res.status(400).json({ message: "OTP is invalid or expired" })
+        }
+
+        user.isVerified = true
+        user.signupOtp = undefined
+        user.signupOtpExpire = undefined
+        await user.save()
+
+        const token = await genToken(user._id)
+        res.cookie("token",token,buildCookieOptions())
+        const safeUser = serializeUser(user)
+        return res.status(200).json({ ...safeUser, token, message: "Signup verified successfully" })
+    } catch (error) {
+        return res.status(500).json({message:`verify signup otp error ${error}`})
+    }
+}
+
+export const resendSignupOtp = async (req,res) => {
+    try {
+        const email = String(req.body?.email || "").trim().toLowerCase()
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" })
+        }
+
+        const user = await User.findOne({ email })
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+        if (user.isVerified !== false) {
+            return res.status(400).json({ message: "This account is already verified" })
+        }
+
+        const otp = generateOtp()
+        user.signupOtp = crypto.createHash("sha256").update(otp).digest("hex")
+        user.signupOtpExpire = Date.now() + 10 * 60 * 1000
+        await user.save()
+
+        if (!hasMailConfig && process.env.NODE_ENV === "production") {
+            return res.status(500).json({ message: "Signup email service is not configured" })
+        }
+
+        await sendSignupOtp({ email: user.email, otp })
+
+        const response = {
+            message: hasMailConfig ? "Verification OTP resent to your email." : "Verification OTP generated successfully.",
+            email: user.email
+        }
+        if (!hasMailConfig) {
+            response.otp = otp
+        }
+
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({message:`resend signup otp error ${error}`})
     }
 }
 
@@ -120,10 +250,10 @@ export const forgotPassword = async (req,res) => {
         await user.save()
 
         const isEmailFlow = Boolean(String(identifier).includes("@"))
-        if (isEmailFlow && !hasMailConfig && process.env.NODE_ENVIRONMENT === "production") {
+        if (isEmailFlow && !hasMailConfig && process.env.NODE_ENV === "production") {
             return res.status(500).json({ message: "OTP email service is not configured" })
         }
-        if (!isEmailFlow && !hasSmsConfig && process.env.NODE_ENVIRONMENT === "production") {
+        if (!isEmailFlow && !hasSmsConfig && process.env.NODE_ENV === "production") {
             return res.status(500).json({ message: "OTP SMS service is not configured" })
         }
 

@@ -20,7 +20,13 @@ import ContactUs from './pages/ContactUs'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsAndConditions from './pages/TermsAndConditions'
 import RefundPolicy from './pages/RefundPolicy'
+import AdminDashboard from './pages/AdminDashboard'
 
+
+const ProtectedRoute = ({ isAuthenticated, children, adminOnly = false }) => {
+  if (!isAuthenticated) return <Navigate to={adminOnly ? "/login" : "/"} />;
+  return children;
+};
 
 function App() {
   let {isAuthenticated} = useContext(userDataContext)
@@ -39,20 +45,15 @@ function App() {
       <Route path='/privacy-policy' element={<PrivacyPolicy/>}/>
       <Route path='/terms-and-conditions' element={<TermsAndConditions/>}/>
       <Route path='/refund-policy' element={<RefundPolicy/>}/>
-      <Route path='/listingpage1' 
-      element={isAuthenticated ? <ListingPage1/>:<Navigate to={"/"}/>}/>
-      <Route path='/listingpage2' 
-      element={isAuthenticated ? <ListingPage2/>:<Navigate to={"/"}/>}/>
-      <Route path='/listingpage3'
-       element={isAuthenticated ? <ListingPage3/>:<Navigate to={"/"}/>}/>
-      <Route path='/mylisting'
-       element={isAuthenticated ? <MyListing/>:<Navigate to={"/"}/>}/>
-        <Route path='/viewcard'
-        element={isAuthenticated ? <ViewCard/>:<Navigate to={"/"}/>}/>
-         <Route path='/mybooking'
-       element={isAuthenticated ? <MyBooking/>:<Navigate to={"/"}/>}/>
-       <Route path='/booked'
-       element={isAuthenticated ? <Booked/>:<Navigate to={"/"}/>}/>
+      
+      <Route path='/admin' element={<ProtectedRoute isAuthenticated={isAuthenticated} adminOnly><AdminDashboard/></ProtectedRoute>}/>
+      <Route path='/listingpage1' element={<ProtectedRoute isAuthenticated={isAuthenticated}><ListingPage1/></ProtectedRoute>}/>
+      <Route path='/listingpage2' element={<ProtectedRoute isAuthenticated={isAuthenticated}><ListingPage2/></ProtectedRoute>}/>
+      <Route path='/listingpage3' element={<ProtectedRoute isAuthenticated={isAuthenticated}><ListingPage3/></ProtectedRoute>}/>
+      <Route path='/mylisting' element={<ProtectedRoute isAuthenticated={isAuthenticated}><MyListing/></ProtectedRoute>}/>
+      <Route path='/viewcard' element={<ProtectedRoute isAuthenticated={isAuthenticated}><ViewCard/></ProtectedRoute>}/>
+      <Route path='/mybooking' element={<ProtectedRoute isAuthenticated={isAuthenticated}><MyBooking/></ProtectedRoute>}/>
+      <Route path='/booked' element={<ProtectedRoute isAuthenticated={isAuthenticated}><Booked/></ProtectedRoute>}/>
       
 
     </Routes>

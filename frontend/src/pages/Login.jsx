@@ -68,7 +68,7 @@ function Login() {
               </div>
               <p className='w-[90%] text-[16px] text-[var(--zenstay-accent)] cursor-pointer' onClick={()=>navigate("/forgot-password")}>Forgot Password?</p>
               <button className='px-[50px] py-[10px] bg-[var(--zenstay-accent)] text-[white] text-[18px] md:px-[100px] rounded-lg hover:bg-[var(--zenstay-accent-dark)] transition-colors' disabled={loading}>{loading?"Loading...":"Login"}</button>
-              <p className='text-[18px]'>Create new account <span className='text-[19px] text-[var(--zenstay-accent)] cursor-pointer' onClick={()=>navigate("/SignUP")}>SignUp</span>
+              <p className='text-[18px]'>Create new account <span className='text-[19px] text-[var(--zenstay-accent)] cursor-pointer' onClick={()=>navigate("/signup")}>SignUp</span>
               </p>
             </form>
          

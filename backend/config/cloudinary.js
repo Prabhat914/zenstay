@@ -8,7 +8,7 @@ const normalizeEnvValue = (value) => String(value || "")
     .trim()
 
 const uploadBufferOnCloudinary = (buffer) => new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream((error, result) => {
+    const stream = cloudinary.uploader.upload_stream({ resource_type: "auto" }, (error, result) => {
         if (error) {
             reject(new Error(error?.message || "Cloudinary upload failed"))
             return
@@ -67,12 +67,12 @@ const uploadOnCloudinary = async (fileInput) => {
             return await uploadBufferOnCloudinary(fileInput.buffer)
         }
         if (typeof fileInput === "string") {
-            const uploadResult = await cloudinary.uploader.upload(fileInput)
+            const uploadResult = await cloudinary.uploader.upload(fileInput, { resource_type: "auto" })
             cleanupLocalFile()
             return uploadResult.secure_url
         }
         if (typeof fileInput?.path === "string" && fileInput.path) {
-            const uploadResult = await cloudinary.uploader.upload(fileInput.path)
+            const uploadResult = await cloudinary.uploader.upload(fileInput.path, { resource_type: "auto" })
             cleanupLocalFile()
             return uploadResult.secure_url
         }

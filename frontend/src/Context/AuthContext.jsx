@@ -3,7 +3,8 @@ import React, { createContext, useEffect, useState } from 'react'
 export const authDataContext = createContext()
 function AuthContext({children}) {
     const prodApiUrl = import.meta.env.VITE_API_URL || "https://zenstay-backend.vercel.app"
-    const serverUrl = import.meta.env.DEV ? "http://localhost:8000" : prodApiUrl
+    const devApiUrl = import.meta.env.VITE_DEV_API_URL || "http://localhost:8000"
+    const serverUrl = import.meta.env.DEV ? devApiUrl : prodApiUrl
 
     let [loading,setLoading]=useState(false)
     const [authToken, setAuthToken] = useState(() => localStorage.getItem("zenstay_token") || "")

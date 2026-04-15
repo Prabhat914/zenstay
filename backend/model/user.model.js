@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:""
     },
+    isAdmin:{
+        type:Boolean,
+        default:false
+    },
     mapUrl:{
         type:String,
         default:""
@@ -29,6 +33,16 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String,
         required:true
+    },
+    isVerified:{
+        type:Boolean,
+        default:true
+    },
+    signupOtp:{
+        type:String
+    },
+    signupOtpExpire:{
+        type:Date
     },
     resetPasswordOtp:{
         type:String

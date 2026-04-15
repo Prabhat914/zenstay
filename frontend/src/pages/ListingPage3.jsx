@@ -16,9 +16,11 @@ function ListingPage3() {
         city,setCity,
         landmark,setLandmark,
         category,setCategory,
+        video,
         handleAddListing,
         adding,setAdding
     } = useContext(listingDataContext)
+    const videoPreview = video ? URL.createObjectURL(video) : null
   return (
     <div className='w-[100%] h-[100vh] bg-[white] flex items-center justify-center gap-[10px] flex-col overflow-auto  relative'>
          <div className='w-[50px] h-[50px] bg-[red] cursor-pointer absolute top-[5%] left-[20px] rounded-[50%] flex items-center justify-center' onClick={()=>navigate("/listingpage2")}><FaArrowLeftLong className='w-[25px] h-[25px] text-[white]' /></div>
@@ -31,7 +33,15 @@ function ListingPage3() {
 
          <div className='w-[95%] h-[400px] flex items-center justify-center flex-col md:w-[80%] md:flex-row '>
             <div className='w-[100%]  h-[65%]  md:w-[70%] md:h-[100%] overflow-hidden flex items-center justify-center border-[2px] border-[white] '>
-                <img src={frontEndImage1} alt="" className='w-[100%]' />
+                {videoPreview ? (
+                    <video 
+                        src={videoPreview} 
+                        className='w-full h-full object-cover' 
+                        controls 
+                    />
+                ) : (
+                    <img src={frontEndImage1} alt="" className='w-[100%]' />
+                )}
             </div>
             <div className='w-[100%] h-[50%]  flex  items-center justify-center md:w-[50%] md:h-[100%] md:flex-col '>
                 <div className='w-[100%] h-[100%]  overflow-hidden  flex items-center justify-center border-[2px] '>

@@ -7,8 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 export const bookingDataContext= createContext()
 function BookingContext({children}) {
-    let [checkIn,setCheckIn]=useState("")
-    let [checkOut,setCheckOut]=useState("")
+    let [checkIn,setCheckIn]=useState(null) // Store as Date object or null
+    let [checkOut,setCheckOut]=useState(null) // Store as Date object or null
     let [total,setTotal]=useState(0)
     let [night,setNight]=useState(0)
     let {serverUrl} = useContext(authDataContext)
@@ -40,15 +40,18 @@ function BookingContext({children}) {
     const handleBooking = async (id) => {
         setbooking(true)
         try {
-            if (!checkIn || !checkOut || Number(total) <= 0) {
+            if (!checkIn || !checkOut || checkIn >= checkOut || Number(total) <= 0) {
                 setbooking(false)
                 return toast.error("Please select valid check-in/check-out dates")
             }
 
             let orderResult
+            const checkInString = checkIn.toISOString().split('T')[0];
+            const checkOutString = checkOut.toISOString().split('T')[0];
+
             try {
                 orderResult = await axios.post(serverUrl + `/api/booking/create-order/${id}`, {
-                    checkIn,checkOut,totalRent:total
+                    checkIn: checkInString, checkOut: checkOutString, totalRent:total
                 },buildAuthConfig())
             } catch (orderError) {
                 throw orderError
@@ -70,8 +73,8 @@ function BookingContext({children}) {
                 order_id: order.id,
                 handler: async function (response) {
                     let verifyResult = await axios.post(serverUrl + `/api/booking/verify/${id}`, {
-                        checkIn,
-                        checkOut,
+                        checkIn: checkInString,
+                        checkOut: checkOutString,
                         totalRent: total,
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,

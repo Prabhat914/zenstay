@@ -34,16 +34,16 @@ const getTransporter = () => {
   return transporter;
 };
 
-export const sendOtpEmail = async ({ toEmail, otp }) => {
+export const sendOtpEmail = async ({ toEmail, otp, subject = "Zenstay password reset OTP", heading = "Zenstay Password Reset", intro = "Your OTP is:" }) => {
   const mailer = getTransporter();
   await mailer.sendMail({
     from: fromEmail,
     to: toEmail,
-    subject: "Zenstay password reset OTP",
+    subject,
     text: `Your Zenstay OTP is ${otp}. It expires in 10 minutes.`,
     html: `<div style="font-family:Arial,sans-serif;line-height:1.5">
-      <h2 style="color:#2bb8bf">Zenstay Password Reset</h2>
-      <p>Your OTP is:</p>
+      <h2 style="color:#2bb8bf">${heading}</h2>
+      <p>${intro}</p>
       <div style="font-size:28px;font-weight:700;letter-spacing:6px;color:#239aa0">${otp}</div>
       <p>This OTP expires in 10 minutes.</p>
     </div>`

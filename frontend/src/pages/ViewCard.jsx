@@ -10,6 +10,10 @@ import { FaStar } from "react-icons/fa";
 import { bookingDataContext } from '../Context/BookingContext';
 import { toast } from 'react-toastify';
 import logoImage from '../assets/zenstay-logo.jpeg'
+import ChatPanel from '../Component/ChatPanel';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import ReelPlayer from '../Component/ReelPlayer';
 
 const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 
@@ -44,12 +48,13 @@ function ViewCard() {
         let [backEndImage3,setBackEndImage3]=useState(null)
         let [rent,setRent]=useState(cardDetails.rent)
         let [city,setCity]=useState(cardDetails.city)
+        let [country,setCountry]=useState(cardDetails.country)
         let [landmark,setLandmark]=useState(cardDetails.landMark)
+        let [category,setCategory]=useState(cardDetails.category)
         let {serverUrl}= useContext(authDataContext)
         let {updating,setUpdating} = useContext(listingDataContext)
         let {deleting,setDeleting} = useContext(listingDataContext)
         let [minDate,setMinDate] = useState("")
-        const fallbackImage = logoImage
         const comments = Array.isArray(cardDetails.comments) ? cardDetails.comments : []
 
         let {checkIn,setCheckIn,
@@ -57,7 +62,7 @@ function ViewCard() {
             total,setTotal,
             night,setNight,handleBooking,booking}=useContext(bookingDataContext)
 
-            useEffect(()=>{
+            useEffect(() => {
                 if(checkIn && checkOut){
                     let inDate = new Date(checkIn)
                     let OutDate = new Date(checkOut)
@@ -73,7 +78,7 @@ function ViewCard() {
                         setTotal(0)
                     }
 
-                }
+                } else { setTotal(0); setNight(0); }
 
             },[checkIn,checkOut,cardDetails.rent,total])
 
@@ -82,7 +87,9 @@ function ViewCard() {
         setDescription(cardDetails.description)
         setRent(cardDetails.rent)
         setCity(cardDetails.city)
+        setCountry(cardDetails.country)
         setLandmark(cardDetails.landMark)
+        setCategory(cardDetails.category)
     }, [cardDetails])
 
     const isLocalListing = String(cardDetails?._id || "").startsWith("local-")
@@ -112,7 +119,9 @@ function ViewCard() {
      formData.append("description",description)
      formData.append("rent",rent)
      formData.append("city",city)
+     formData.append("country",country)
      formData.append("landMark",landmark)
+     formData.append("category",category)
     
         
         let result = await axios.post(serverUrl + `/api/listing/update/${cardDetails._id}`, formData, buildAuthConfig())
@@ -231,10 +240,6 @@ function ViewCard() {
         
     }
         
-    useEffect(()=>{
-        let today=new Date().toISOString().split('T')[0]
-        setMinDate(today)
-    },[])
     
   return (
     <div className='w-[100%] h-[100vh] bg-[white] flex items-center justify-center gap-[10px] flex-col overflow-auto  relative'>
@@ -248,7 +253,11 @@ function ViewCard() {
     
              <div className='w-[95%] h-[400px] flex items-center justify-center flex-col md:w-[80%] md:flex-row '>
                 <div className='w-[100%]  h-[65%]  md:w-[70%] md:h-[100%] overflow-hidden flex items-center justify-center border-[2px] border-[white] '>
-                    <img src={cardDetails.image1 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-[100%]' />
+                    {cardDetails.reel || cardDetails.video ? (
+                        <ReelPlayer url={cardDetails.reel || cardDetails.video} />
+                    ) : (
+                        <img src={cardDetails.image1 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-[100%]' />
+                    )}
                 </div>
                 <div className='w-[100%] h-[50%]  flex  items-center justify-center md:w-[50%] md:h-[100%] md:flex-col '>
                     <div className='w-[100%] h-[100%]  overflow-hidden  flex items-center justify-center border-[2px] '>
@@ -263,6 +272,17 @@ function ViewCard() {
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px]'>{`${cardDetails.title.toUpperCase()} ${cardDetails.category.toUpperCase()} , ${cardDetails.landMark.toUpperCase()}`}</div>
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px] text-gray-800'>{cardDetails.description}</div>
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px]'>{`Rs.${cardDetails.rent}/day`}</div>
+             
+             {/* Map Section */}
+             {cardDetails.mapUrl && (
+                <div className='w-[95%] md:w-[80%] mt-[20px]'>
+                    <h2 className='text-[22px] font-semibold mb-[10px]'>Location</h2>
+                    <div className='w-full h-[300px] rounded-xl overflow-hidden border border-gray-200'>
+                        <iframe src={cardDetails.mapUrl} width="100%" height="100%" style={{ border: 0 }} allowFullScreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+             )}
+
              <div className='w-[95%] max-w-[900px] flex items-start justify-start flex-col gap-[12px] md:w-[80%] mt-[10px]'>
                 <h2 className='text-[22px] font-semibold'>Comments</h2>
                 <div className='w-[100%] flex flex-col gap-[10px] rounded-lg border border-[#ddd] p-[15px] bg-[#fafafa]'>
@@ -297,6 +317,14 @@ function ViewCard() {
                     ))}
                 </div>
              </div>
+
+             <ChatPanel
+                cardDetails={cardDetails}
+                userData={userData}
+                serverUrl={serverUrl}
+                buildAuthConfig={buildAuthConfig}
+                isLocalListing={isLocalListing}
+             />
                  
              <div className='w-[95%] h-[50px] flex items-center justify-start gap-[15px] px-[110px]'>{cardDetails.host == userData?._id &&<button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg  text-nowrap' onClick={()=>setUpdatePopUp(prev => !prev)}> 
               Edit listing
@@ -333,19 +361,19 @@ function ViewCard() {
                  
                              <div className='w-[90%] flex items-start justify-center flex-col gap-[10px]'>
                                <label htmlFor="img1" className='text-[20px]'>Image1</label>
-                               <div className='flex items-center justify-start  w-[90%] h-[40px] border-[#555656] border-2 rounded-[10px] '><input type="file" id='img1' className='w-[100%] text-[15px] px-[10px] ' required onChange={handleImage1} />
+                               <div className='flex items-center justify-start  w-[90%] h-[40px] border-[#555656] border-2 rounded-[10px] '><input type="file" id='img1' className='w-[100%] text-[15px] px-[10px] ' onChange={handleImage1} />
                                </div>
                              </div> 
                  
                              <div className='w-[90%] flex items-start justify-center flex-col gap-[10px]'>
                                <label htmlFor="img2" className='text-[20px]'>Image2</label>
-                               <div className='flex items-center justify-start  w-[90%] h-[40px] border-[#555656] border-2 rounded-[10px]'><input type="file" id='img2' className='w-[100%] text-[15px] px-[10px] ' required onChange={handleImage2} />
+                               <div className='flex items-center justify-start  w-[90%] h-[40px] border-[#555656] border-2 rounded-[10px]'><input type="file" id='img2' className='w-[100%] text-[15px] px-[10px] ' onChange={handleImage2} />
                                </div>
                              </div> 
                  
                              <div className='w-[90%] flex items-start justify-center flex-col gap-[10px]'>
                                <label htmlFor="img3" className='text-[20px]'>Image3</label>
-                               <div className='flex items-center justify-start  w-[90%] h-[40px] border-[#555656] border-2 rounded-[10px]'><input type="file" id='img3' className='w-[100%] text-[15px] px-[10px] ' required onChange={handleImage3}  />
+                               <div className='flex items-center justify-start  w-[90%] h-[40px] border-[#555656] border-2 rounded-[10px]'><input type="file" id='img3' className='w-[100%] text-[15px] px-[10px] ' onChange={handleImage3}  />
                                </div>
                              </div> 
                  
@@ -356,14 +384,24 @@ function ViewCard() {
                  
                              <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
                                <label htmlFor="city" className='text-[20px]'>City</label>
-                               <input type="text" id='city' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px] text-[black]' requiredplaceholder='city,country ' onChange={(e)=>setCity(e.target.value)} value={city}/>
+                               <input type="text" id='city' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px] text-[black]' placeholder='City' onChange={(e)=>setCity(e.target.value)} value={city}/>
                              </div> 
+
+                             <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
+                               <label htmlFor="country" className='text-[20px]'>Country</label>
+                               <input type="text" id='country' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px] text-[black]' placeholder='Country' onChange={(e)=>setCountry(e.target.value)} value={country}/>
+                             </div>
                  
                              <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
                                <label htmlFor="landmark" className='text-[20px]'>Landmark</label>
                                <input type="text" id='landmark' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px] text-[black]' required onChange={(e)=>setLandmark(e.target.value)} value={landmark}/>
                  
                              </div> 
+
+                             <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
+                               <label htmlFor="category" className='text-[20px]'>Category</label>
+                               <input type="text" id='category' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px] text-[black]' placeholder='Category' onChange={(e)=>setCategory(e.target.value)} value={category}/>
+                             </div>
                  <div className='w-[100%] flex items-center justify-center gap-[30px] mt-[20px]'>
                              <button className='px-[10px] py-[10px] bg-[red] text-[white] text-[15px] md:px-[100px] rounded-lg md:text-[18px] text-nowrap  ' onClick={handleUpdateListing} disabled={updating}>{updating?"updating...":"Update Listing"}</button>
                              <button className='px-[10px] py-[10px] bg-[red] text-[white] text-[15px] md:px-[100px] md:text-[18px] rounded-lg  text-nowrap 'onClick={handleDeleteListing} disabled={deleting}>{deleting?"Deleting...":"Delete Listing"}</button>
@@ -388,12 +426,34 @@ function ViewCard() {
                                    <h3 className='text-[19px] font-semibold'> Your Trip -</h3>
                                    <div className='w-[90%] flex items-center justify-start] gap-[24px] mt-[20px] md:justify-center flex-col md:flex-row md:items-start'>
                                <label htmlFor="checkin" className='text-[18px] md:text-[20px]'>CheckIn</label>
-                               <input type="date" min={minDate} id='checkIn' className='border-[#555656] border-2 w-[200px] h-[40px] rounded-[10px] bg-transparent px-[10px] text-[15px] md:text-[18px]' required onChange={(e)=>setCheckIn(e.target.value)} value={checkIn}  />
+                               <DatePicker
+                                    selected={checkIn}
+                                    onChange={(date) => setCheckIn(date)}
+                                    selectsStart
+                                    startDate={checkIn}
+                                    endDate={checkOut}
+                                    minDate={new Date()} // Today's date
+                                    placeholderText="Check-in Date"
+                                    dateFormat="yyyy/MM/dd"
+                                    className='border-[#555656] border-2 w-[200px] h-[40px] rounded-[10px] bg-transparent px-[10px] text-[15px] md:text-[18px]'
+                                    required
+                                />
                  
                              </div> 
                              <div className='w-[90%] flex items-center justify-start] gap-[10px] mt-[40px] md:justify-center flex-col md:flex-row md:items-start'>
                                <label htmlFor="checkOut" className='text-[18px] md:text-[20px]'>CheckOut</label>
-                               <input type="date" min={minDate} id='checkOut' className='border-[#555656] border-2 w-[200px] h-[40px] rounded-[10px] bg-transparent px-[10px] text-[15px] md:text-[18px]' required onChange={(e)=>setCheckOut(e.target.value)} value={checkOut}  />
+                               <DatePicker
+                                    selected={checkOut}
+                                    onChange={(date) => setCheckOut(date)}
+                                    selectsEnd
+                                    startDate={checkIn}
+                                    endDate={checkOut}
+                                    minDate={checkIn} // Check-out cannot be before check-in
+                                    placeholderText="Check-out Date"
+                                    dateFormat="yyyy/MM/dd"
+                                    className='border-[#555656] border-2 w-[200px] h-[40px] rounded-[10px] bg-transparent px-[10px] text-[15px] md:text-[18px]'
+                                    required
+                                />
 
                  
                              </div> 

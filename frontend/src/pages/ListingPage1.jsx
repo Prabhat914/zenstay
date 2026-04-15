@@ -78,7 +78,9 @@ function ListingPage1() {
     rent,setRent,
     city,setCity,
     landmark,setLandmark,
-    category,setCategory} = useContext(listingDataContext)
+    category,setCategory,
+    video, setVideo
+    } = useContext(listingDataContext)
     
 
     const handleImageChange = async (file, setBackEndImage, setFrontEndImage, inputElement) => {
@@ -111,6 +113,12 @@ function ListingPage1() {
         let file = e.target.files[0]
         await handleImageChange(file, setBackEndImage3, setFrontEndImage3, e.target)
     }
+
+    const handleVideoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) setVideo(file);
+    };
+
   return (
     <div className='w-[100%] h-[100vh] bg-white flex items-center justify-center relative overflow-auto'>
 
@@ -148,6 +156,13 @@ function ListingPage1() {
               <div className='flex items-center justify-start  w-[90%] h-[40px] border-[#555656] border-2 rounded-[10px]'><input type="file" id='img3' className='w-[100%] text-[15px] px-[10px] ' required  onChange={handleImage3}/>
               </div>
             </div> 
+
+            <div className='w-[90%] flex items-start justify-center flex-col gap-[10px]'>
+              <label htmlFor="video" className='text-[20px]'>Property Video (Optional)</label>
+              <div className='flex items-center justify-start  w-[90%] h-[40px] border-[#555656] border-2 rounded-[10px]'>
+                <input type="file" id='video' accept="video/*" className='w-[100%] text-[15px] px-[10px]' onChange={handleVideoChange}/>
+              </div>
+            </div>
 
             <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
               <label htmlFor="rent" className='text-[20px]'>Rent</label>

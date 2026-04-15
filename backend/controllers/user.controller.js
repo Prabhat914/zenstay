@@ -1,4 +1,5 @@
 import User from "../model/user.model.js"
+import { isAdminUser } from "../utils/access.js"
 
 export const getCurrentUser = async (req,res) => {
     try {
@@ -8,7 +9,9 @@ export const getCurrentUser = async (req,res) => {
             return res.status(400).json({message:"user doesn't found"})
 
         }
-        return res.status(200).json(user)
+        const userObject = user.toObject()
+        userObject.isAdmin = isAdminUser(userObject)
+        return res.status(200).json(userObject)
     } catch (error) {
         return res.status(500).json({message:`getCurrentUser error ${error}`})
     }

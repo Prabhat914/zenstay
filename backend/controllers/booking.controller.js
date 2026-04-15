@@ -54,7 +54,9 @@ export const createBookingOrder = async (req, res) => {
         }
 
         const amount = Math.max(Math.round(Number(totalRent) * 100), 100)
-        const receipt = `zenstay_${id}_${Date.now()}`
+        // Razorpay receipt max length is 40 chars.
+        const shortListingId = String(id || "").slice(-8)
+        const receipt = `zs_${shortListingId}_${Date.now().toString(36)}`
         const auth = Buffer.from(`${razorpayKeyId}:${razorpayKeySecret}`).toString("base64")
 
         const response = await fetch("https://api.razorpay.com/v1/orders", {
@@ -140,13 +142,28 @@ export const verifyPaymentAndCreateBooking = async (req, res) => {
 export const cancelBooking = async (req,res) => {
     try {
         let {id} = req.params
-        let listing = await Listing.findByIdAndUpdate(id,{isBooked:false})
+        let listing = await Listing.findById(id)
+        if (!listing) {
+            return res.status(404).json({message:"Listing not found"})
+        }
+        const isHost = String(listing.host) === String(req.userId)
+        const isGuest = String(listing.guest) === String(req.userId)
+        if (!isHost && !isGuest) {
+            return res.status(403).json({message:"You are not allowed to cancel this booking"})
+        }
+        if (!listing.guest) {
+            return res.status(400).json({message:"Listing is not currently booked"})
+        }
+
         let user = await User.findByIdAndUpdate(listing.guest,{
             $pull:{booking:listing._id}
         },{new:true})
         if(!user){
             return res.status(404).json({message:"user is not found"})
         }
+        listing.isBooked = false
+        listing.guest = null
+        await listing.save()
         return res.status(200).json({message:"booking cancelled"})
 
     } catch (error) {

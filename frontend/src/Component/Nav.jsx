@@ -15,47 +15,47 @@ const categoryItems = [
     {
         key: "trending",
         label: "Trending",
-        image: trendingLogo
+        image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80"
     },
     {
         key: "villa",
         label: "Villa",
-        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=300&q=80"
+        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=200&q=80"
     },
     {
         key: "farmHouse",
         label: "Farm House",
-        image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=300&q=80"
+        image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=200&q=80"
     },
     {
         key: "poolHouse",
         label: "Pool House",
-        image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=300&q=80"
+        image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=200&q=80"
     },
     {
         key: "rooms",
         label: "Rooms",
-        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=300&q=80"
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=200&q=80"
     },
     {
         key: "flat",
         label: "Flat",
-        image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=300&q=80"
+        image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=200&q=80"
     },
     {
         key: "pg",
         label: "PG",
-        image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=300&q=80"
+        image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=200&q=80"
     },
     {
         key: "cabin",
         label: "Cabins",
-        image: "https://images.unsplash.com/photo-1472224371017-08207f84aaae?auto=format&fit=crop&w=300&q=80"
+        image: "https://images.unsplash.com/photo-1472224371017-08207f84aaae?auto=format&fit=crop&w=200&q=80"
     },
     {
         key: "shops",
         label: "Shops",
-        image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=300&q=80"
+        image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=200&q=80"
     }
 ]
 
@@ -70,7 +70,7 @@ function Nav() {
     const hasValidUser = Boolean(isAuthenticated)
     const handleLogOut = async () => {
         try {
-            let result = await axios.post( serverUrl + "/api/auth/logout", {withCredentials:true})
+            let result = await axios.post( serverUrl + "/api/auth/logout", {}, {withCredentials:true})
             setUserData(null)
             setAuthToken("")
             localStorage.removeItem("zenstay_token")
@@ -190,6 +190,7 @@ function Nav() {
                             <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer' onClick={()=>openProtectedRoute("/listingpage1")}>List your Home</li>
                             <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer'onClick={()=>openProtectedRoute("/mylisting")}>My Listing</li>
                             <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer'  onClick={()=>openProtectedRoute("/mybooking")}>MY Booking</li>
+                            {userData?.isAdmin && <li className='w-[100%] px-[15px] py-[10px] hover:bg-[#f4f3f3] cursor-pointer' onClick={()=>openProtectedRoute("/admin")}>Admin Dashboard</li>}
                         </ul>
 
                     </div>}

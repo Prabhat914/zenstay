@@ -7,7 +7,8 @@ let listingRouter = express.Router()
 const listingUploadFields = upload.fields([
     {name:"image1",maxCount:1},
     {name:"image2",maxCount:1},
-    {name:"image3",maxCount:1}
+    {name:"image3",maxCount:1},
+    {name:"video",maxCount:1}
 ])
 
 const optionalListingUpload = (req, res, next) => {

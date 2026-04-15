@@ -32,13 +32,21 @@ const listingSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    video:{
+        type:String,
+        default:""
+    },
+    reel:{
+        type:String,
+        default:""
+    },
     rent:{
         type:Number,
         required:true
     },
     city:{
         type:String,
-        require:true
+        required:true
 
     },
     country:{
@@ -47,19 +55,23 @@ const listingSchema = new mongoose.Schema({
     },
     landMark:{
         type:String,
-        require:true
+        required:true
 
     },
     category:{
         type:String,
-        require:true
+        required:true
 
     },
-    ratings:{
-        type:Number,
-        min:0,
-        max:5,
-        default:0
+    averageRating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
+    },
+    numberOfRatings: {
+        type: Number,
+        default: 0
     },
     comments:[{
         user:{

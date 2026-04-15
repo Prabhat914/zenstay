@@ -59,3 +59,27 @@ export const getAllLegalPages = async (req, res) => {
     }
 };
 
+export const updateLegalPage = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const title = String(req.body?.title || "").trim();
+        const content = String(req.body?.content || "").trim();
+
+        if (!title) {
+            return res.status(400).json({ message: "Title is required" });
+        }
+        if (!content) {
+            return res.status(400).json({ message: "Content is required" });
+        }
+
+        const page = await LegalPage.findOneAndUpdate(
+            { slug },
+            { slug, title, content },
+            { new: true, upsert: true, runValidators: true }
+        );
+
+        return res.status(200).json(page);
+    } catch (error) {
+        return res.status(500).json({ message: `updateLegalPage error ${error}` });
+    }
+};
