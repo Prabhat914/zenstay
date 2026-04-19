@@ -1,3 +1,4 @@
+
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
@@ -8,115 +9,100 @@ dotenv.config();
 
 const mongoUrl = process.env.MONGODB_URL || process.env.MONGO_URI;
 
+// 🔥 Seed Data
 const seedListings = [
   {
     title: "Trending Lake View Villa",
-    description: "Scenic villa with modern rooms and full-day concierge service.",
+    description: "Scenic villa with modern rooms and concierge service.",
     category: "villa",
     city: "Udaipur",
     landMark: "Fateh Sagar Lake",
     rent: 5200,
     ratings: 4.8,
-    image1: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
-    image2: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
-    image3: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80"
+    image1: "https://images.unsplash.com/photo-1613977257363-707ba9348227",
+    image2: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+    image3: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6"
   },
   {
     title: "Green Valley Farm House",
-    description: "Quiet farm house with open lawn and family barbecue setup.",
+    description: "Farm house with lawn and barbecue.",
     category: "farmHouse",
     city: "Nashik",
     landMark: "Sula Vineyards",
     rent: 3800,
     ratings: 4.5,
-    image1: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
-    image2: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=80",
-    image3: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Blue Deck Pool House",
-    description: "Private pool house perfect for weekend parties and staycations.",
-    category: "poolHouse",
-    city: "Goa",
-    landMark: "Candolim Beach",
-    rent: 6900,
-    ratings: 4.9,
-    image1: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=1200&q=80",
-    image2: "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1200&q=80",
-    image3: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "City Budget Rooms",
-    description: "Clean and affordable private rooms near transit and markets.",
-    category: "rooms",
-    city: "Delhi",
-    landMark: "Karol Bagh",
-    rent: 1700,
-    ratings: 4.2,
-    image1: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
-    image2: "https://images.unsplash.com/photo-1616594039964-3f2b9dd2f7ab?auto=format&fit=crop&w=1200&q=80",
-    image3: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Skyline Service Flat",
-    description: "Fully furnished flat with kitchen, wifi, and daily housekeeping.",
-    category: "flat",
-    city: "Bengaluru",
-    landMark: "Koramangala",
-    rent: 3200,
-    ratings: 4.4,
-    image1: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
-    image2: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
-    image3: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80"
-  },
-  {
-    title: "Student Friendly PG",
-    description: "Shared PG with meals, laundry, and flexible monthly plans.",
-    category: "pg",
-    city: "Pune",
-    landMark: "Hinjewadi",
-    rent: 950,
-    ratings: 4.1,
-    image1: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80",
-    image2: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80",
-    image3: "https://images.unsplash.com/photo-1560185007-5f0bb1866cab?auto=format&fit=crop&w=1200&q=80"
+    image1: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
+    image2: "https://images.unsplash.com/photo-1568605114967-8130f3a36994",
+    image3: "https://images.unsplash.com/photo-1570129477492-45c003edd2be"
   },
   {
     title: "Forest Edge Cabin",
-    description: "Wooden cabin with mountain views and bonfire evenings.",
+    description: "Wooden cabin with mountain views.",
     category: "cabin",
     city: "Manali",
     landMark: "Old Manali",
     rent: 4100,
     ratings: 4.7,
-    image1: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=80",
-    image2: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
-    image3: "https://images.unsplash.com/photo-1472224371017-08207f84aaae?auto=format&fit=crop&w=1200&q=80"
+    image1: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267",
+    image2: "https://images.unsplash.com/photo-1472224371017-08207f84aaae",
+    image3: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85"
   },
-  {
-    title: "Zenstay Private Room",
-    description: "Comfortable private room stay with essentials for daily living.",
-    category: "shops",
-    city: "Noida",
-    landMark: "Sector 62",
-    rent: 2100,
-    ratings: 4.3,
-    image1: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
-    image2: "https://images.unsplash.com/photo-1616594039964-3f2b9dd2f7ab?auto=format&fit=crop&w=1200&q=80",
-    image3: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1200&q=80"
-  }
+
+  // 🔥 60 Mixed Listings
+  ...Array.from({ length: 60 }, (_, i) => ({
+    title: `Comfort Stay ${i + 1}`,
+    description: "Clean rooms, WiFi, great service.",
+    category: i % 2 === 0 ? "hotel" : "pg",
+    city: [
+      "Jaipur","Goa","Chennai","Kolkata","Pune",
+      "Lucknow","Ahmedabad","Indore","Chandigarh","Shimla"
+    ][i % 10],
+    landMark: [
+      "City Center","Beach Road","Railway Station",
+      "Mall Road","IT Park","Airport Area"
+    ][i % 6],
+    rent: 800 + i * 100,
+    ratings: Number((3.5 + (i % 15) * 0.1).toFixed(1)),
+    image1: "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+    image2: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa",
+    image3: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b"
+  })),
+
+  // 🔥 60 Extra Hotels
+  ...Array.from({ length: 60 }, (_, i) => ({
+    title: `Luxury Hotel ${i + 1}`,
+    description: "Premium hotel with breakfast and AC rooms.",
+    category: "hotel",
+    city: [
+      "Mumbai","Delhi","Bangalore","Hyderabad","Kolkata",
+      "Chennai","Goa","Jaipur","Udaipur","Varanasi"
+    ][i % 10],
+    landMark: [
+      "Near Airport","City Center","Railway Station",
+      "Mall Road","Beach Area","Business Hub"
+    ][i % 6],
+    rent: 2000 + i * 150,
+    ratings: Number((4.0 + (i % 10) * 0.1).toFixed(1)),
+    image1: "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+    image2: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa",
+    image3: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b"
+  }))
 ];
 
 async function run() {
-  if (!mongoUrl) {
-    throw new Error("Missing MONGODB_URL/MONGO_URI in .env");
-  }
+  if (!mongoUrl) throw new Error("Missing Mongo URI");
 
   await mongoose.connect(mongoUrl);
+  console.log("✅ Mongo Connected");
+
+  // 🔥 Optional: clear old data
+  await Listing.deleteMany({});
 
   let host = await User.findOne({ email: "demo.host@zenstay.com" });
+
   if (!host) {
     const hash = await bcrypt.hash("DemoHost@123", 10);
+
     host = await User.create({
       name: "Zenstay Demo Host",
       email: "demo.host@zenstay.com",
@@ -124,27 +110,36 @@ async function run() {
       listing: [],
       booking: []
     });
+
+    console.log("✅ Host Created");
   }
 
   const addedIds = [];
+
   for (const item of seedListings) {
-    let listing = await Listing.findOne({ title: item.title, host: host._id });
-    if (!listing) {
-      listing = await Listing.create({ ...item, host: host._id, isBooked: false });
-    }
+    const listing = await Listing.create({
+      ...item,
+      host: host._id,
+      isBooked: false
+    });
     addedIds.push(listing._id);
   }
 
-  await User.findByIdAndUpdate(host._id, { $addToSet: { listing: { $each: addedIds } } });
+  await User.findByIdAndUpdate(host._id, {
+    $addToSet: { listing: { $each: addedIds } }
+  });
 
-  const total = await Listing.countDocuments({ host: host._id });
-  console.log(`Seed complete. Demo host listings: ${total}`);
+  const total = await Listing.countDocuments();
+  console.log(`✅ Seed Done: ${total} Listings`);
 
   await mongoose.disconnect();
+  console.log("✅ Mongo Disconnected");
 }
 
 run().catch(async (err) => {
-  console.error("Seed failed:", err.message || err);
-  try { await mongoose.disconnect(); } catch {}
+  console.error("❌ Error:", err.message);
+  try {
+    await mongoose.disconnect();
+  } catch {}
   process.exit(1);
 });
