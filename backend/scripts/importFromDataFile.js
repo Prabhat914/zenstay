@@ -10,6 +10,85 @@ dotenv.config();
 
 const mongoUrl = process.env.MONGODB_URL || process.env.MONGO_URI;
 
+const INDIA_CITY_HINTS = [
+  "agra",
+  "ahmedabad",
+  "alibaug",
+  "amritsar",
+  "bengaluru",
+  "bangalore",
+  "bhopal",
+  "chandigarh",
+  "chennai",
+  "coorg",
+  "delhi",
+  "dehradun",
+  "goa",
+  "gurugram",
+  "hyderabad",
+  "indore",
+  "jaipur",
+  "jodhpur",
+  "kochi",
+  "kolkata",
+  "lonavala",
+  "lucknow",
+  "manali",
+  "mumbai",
+  "mussoorie",
+  "mysuru",
+  "nainital",
+  "nashik",
+  "noida",
+  "pune",
+  "rishikesh",
+  "shimla",
+  "udaipur",
+  "varanasi"
+];
+
+function normalizeText(value = "") {
+  return String(value || "").trim();
+}
+
+function safeSeed(...parts) {
+  return encodeURIComponent(parts.filter(Boolean).join("-").toLowerCase());
+}
+
+function buildLocationImages(category, city, landMark, title) {
+  const tagsByCategory = {
+    villa: "villa,house,india",
+    farmHouse: "farmhouse,india,home",
+    poolHouse: "pool,villa,india",
+    rooms: "hotel,room,india",
+    flat: "apartment,india,interior",
+    pg: "hostel,room,india",
+    cabin: "cabin,mountain,india",
+    shops: "shop,storefront,india"
+  };
+  const categoryTags = tagsByCategory[category] || "stay,india,property";
+  const locationTags = [city, landMark, title, "india"]
+    .map((item) => normalizeText(item).toLowerCase().replace(/\s+/g, ","))
+    .filter(Boolean)
+    .join(",");
+  const tags = [categoryTags, locationTags].filter(Boolean).join(",");
+  const base = safeSeed(category, city, landMark, title);
+  return [
+    `https://loremflickr.com/1200/800/${tags}?lock=${base}-1`,
+    `https://loremflickr.com/1200/800/${tags}?lock=${base}-2`,
+    `https://loremflickr.com/1200/800/${tags}?lock=${base}-3`
+  ];
+}
+
+function isIndianRecord({ city = "", country = "", location = "" }) {
+  const normalizedCountry = normalizeText(country).toLowerCase();
+  if (normalizedCountry === "india") {
+    return true;
+  }
+  const haystack = `${normalizeText(city)} ${normalizeText(location)}`.toLowerCase();
+  return INDIA_CITY_HINTS.some((hint) => haystack.includes(hint));
+}
+
 function inferCategory(title = "") {
   const t = title.toLowerCase();
   if (t.includes("villa")) return "villa";
@@ -58,29 +137,34 @@ async function run() {
   const addedIds = [];
 
   for (const item of records) {
-    const title = String(item?.title || "").trim();
-    const description = String(item?.description || "").trim();
-    const url = String(item?.image?.url || "").trim();
-    const city = String(item?.location || "Unknown").trim();
-    const country = String(item?.country || "Unknown").trim();
+    const title = normalizeText(item?.title);
+    const description = normalizeText(item?.description);
+    const url = normalizeText(item?.image?.url);
+    const city = normalizeText(item?.location || "Unknown");
+    const country = normalizeText(item?.country || "Unknown");
     const landMark = city;
     const rent = Number(item?.price || 0);
     const category = inferCategory(title);
 
-    if (!title || !description || !url || !rent) {
+    if (!title || !description || !rent) {
       continue;
     }
+    if (!isIndianRecord({ city, country, location: item?.location })) {
+      continue;
+    }
+
+    const [image1, image2, image3] = buildLocationImages(category, city, landMark, title);
 
     const update = {
       title,
       description,
       host: host._id,
-      image1: url,
-      image2: url,
-      image3: url,
+      image1: image1 || url,
+      image2: image2 || url,
+      image3: image3 || url,
       rent,
       city,
-      country,
+      country: "India",
       landMark,
       category,
       isBooked: false

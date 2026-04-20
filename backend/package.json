@@ -14,6 +14,7 @@
     "seed": "node scripts/seedListings.js",
     "seed:topup": "node scripts/topupListingsToTen.js",
     "seed:repair-images": "node scripts/repairListingImages.js",
+    "seed:cleanup-india": "node scripts/cleanupIndiaListings.js",
     "seed:import-data": "node scripts/importFromDataFile.js",
     "seed:cleanup-legacy": "node scripts/cleanupLegacySeedListings.js",
     "seed:all": "npm run seed:cleanup-legacy && npm run seed:import-data"
