@@ -580,7 +580,7 @@ function ListingContext({children}) {
      const getListing = async () => {
         setListingsLoading(true)
         try {
-            let result = await axios.get( serverUrl + "/api/listing/get",{withCredentials:true, timeout: 6000})
+            let result = await axios.get(serverUrl + "/api/listing/get", { withCredentials: true })
             const items = Array.isArray(result.data) ? result.data : []
             if (items.length === 0) {
                 const mergedEmptyItems = mergeListings([], { includeDemo: true })

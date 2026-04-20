@@ -135,7 +135,10 @@ export const addListing = async (req,res) => {
 
 export const getListing= async (req,res) => {
     try {
-        let listing = await Listing.find().sort({createdAt:-1})
+        let listing = await Listing.find()
+            .select("title description host image1 image2 image3 video reel rent city country landMark category averageRating numberOfRatings isBooked createdAt updatedAt")
+            .sort({createdAt:-1})
+            .lean()
         return res.status(200).json(listing)
     } catch (error) {
         return res.status(500).json({message:`getListing error ${error}`})
