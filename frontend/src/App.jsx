@@ -1,8 +1,8 @@
 import React, { useContext } from 'react'
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import ListingPage1 from './pages/ListingPage1'
@@ -51,7 +51,7 @@ function App() {
       <Route path='/listingpage2' element={<ProtectedRoute isAuthenticated={isAuthenticated}><ListingPage2/></ProtectedRoute>}/>
       <Route path='/listingpage3' element={<ProtectedRoute isAuthenticated={isAuthenticated}><ListingPage3/></ProtectedRoute>}/>
       <Route path='/mylisting' element={<ProtectedRoute isAuthenticated={isAuthenticated}><MyListing/></ProtectedRoute>}/>
-      <Route path='/viewcard' element={<ProtectedRoute isAuthenticated={isAuthenticated}><ViewCard/></ProtectedRoute>}/>
+      <Route path='/viewcard' element={<ViewCard/>}/>
       <Route path='/mybooking' element={<ProtectedRoute isAuthenticated={isAuthenticated}><MyBooking/></ProtectedRoute>}/>
       <Route path='/booked' element={<ProtectedRoute isAuthenticated={isAuthenticated}><Booked/></ProtectedRoute>}/>
       

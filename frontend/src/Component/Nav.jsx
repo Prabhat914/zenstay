@@ -10,6 +10,7 @@ import axios from 'axios';
 import { userDataContext } from '../Context/UserContext';
 import { listingDataContext } from '../Context/ListingContext';
 import { toast } from 'react-toastify';
+import { normalizeListingCategory } from '../utils/listingCategory';
 
 const categoryItems = [
     {
@@ -92,19 +93,13 @@ function Nav() {
         )
        }
        else{
-       setNewListData(listingData.filter((list)=>list.category==category))}
+       setNewListData(listingData.filter((list)=>normalizeListingCategory(list.category)===category))}
 
        
 
     }
     const handleClick = (id, listingItem = null) => {
-        if (hasValidUser) {
-            handleViewCard(id, listingItem)
-        }
-        else {
-            toast.info("Please login first")
-            navigate("/login")
-        }
+        handleViewCard(id, listingItem)
     }
     const applyLocalSearch = (queryText) => {
         const query = String(queryText || "").trim().toLowerCase()

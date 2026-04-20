@@ -14,6 +14,7 @@ import ChatPanel from '../Component/ChatPanel';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ReelPlayer from '../Component/ReelPlayer';
+import { categoryOptions, normalizeListingCategory } from '../utils/listingCategory';
 
 const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 
@@ -50,7 +51,7 @@ function ViewCard() {
         let [city,setCity]=useState(cardDetails.city)
         let [country,setCountry]=useState(cardDetails.country)
         let [landmark,setLandmark]=useState(cardDetails.landMark)
-        let [category,setCategory]=useState(cardDetails.category)
+        let [category,setCategory]=useState(normalizeListingCategory(cardDetails.category) || "rooms")
         let {serverUrl}= useContext(authDataContext)
         let {updating,setUpdating} = useContext(listingDataContext)
         let {deleting,setDeleting} = useContext(listingDataContext)
@@ -89,7 +90,7 @@ function ViewCard() {
         setCity(cardDetails.city)
         setCountry(cardDetails.country)
         setLandmark(cardDetails.landMark)
-        setCategory(cardDetails.category)
+        setCategory(normalizeListingCategory(cardDetails.category) || "rooms")
     }, [cardDetails])
 
     const listingId = String(cardDetails?._id || "")
@@ -339,7 +340,14 @@ function ViewCard() {
              {cardDetails.host == userData?._id && <button className='px-[30px] py-[10px] bg-black text-[white] text-[18px] md:px-[100px] rounded-lg text-nowrap' onClick={handleDeleteListing} disabled={deleting}>
                 {deleting ? "Deleting..." : "Delete listing"}
              </button>}
-             {!isDemoListing && cardDetails.host != userData?._id && <button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg   text-nowrap' onClick={()=>setBookingPopUp(prev => !prev)}> 
+             {!isDemoListing && cardDetails.host != userData?._id && <button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg   text-nowrap' onClick={()=>{
+                if (!userData?._id) {
+                    toast.info("Please login first")
+                    navigate("/login")
+                    return
+                }
+                setBookingPopUp(prev => !prev)
+             }}> 
                 Reserve
              </button>}
              </div>
@@ -407,7 +415,11 @@ function ViewCard() {
 
                              <div className='w-[90%] flex items-start justify-start flex-col gap-[10px]'>
                                <label htmlFor="category" className='text-[20px]'>Category</label>
-                               <input type="text" id='category' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px] text-[black]' placeholder='Category' onChange={(e)=>setCategory(e.target.value)} value={category}/>
+                               <select id='category' className='w-[90%] h-[40px] border-[2px] border-[#555656] rounded-lg text-[18px] px-[20px] text-[black]' onChange={(e)=>setCategory(e.target.value)} value={category}>
+                                {categoryOptions.map((item) => (
+                                    <option key={item.key} value={item.key}>{item.label}</option>
+                                ))}
+                               </select>
                              </div>
                  <div className='w-[100%] flex items-center justify-center gap-[30px] mt-[20px]'>
                              <button className='px-[10px] py-[10px] bg-[red] text-[white] text-[15px] md:px-[100px] rounded-lg md:text-[18px] text-nowrap  ' onClick={handleUpdateListing} disabled={updating}>{updating?"updating...":"Update Listing"}</button>

@@ -5,6 +5,7 @@ import { userDataContext } from './UserContext'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import logoImage from '../assets/zenstay-logo.jpeg'
+import { normalizeListingRecord, resolveListingCategory } from '../utils/listingCategory'
 
 export const listingDataContext = createContext()
 const MAX_LISTING_UPLOAD_SIZE = 1600 * 1024
@@ -51,7 +52,7 @@ const getErrorMessage = (error, fallbackMessage) => {
 function ListingContext({children}) {
     let navigate = useNavigate() 
     const userContextValue = useContext(userDataContext) || {}
-    let { userData = null, setUserData = () => {} } = userContextValue
+    let { userData = null, setUserData = () => {}, getCurrentUser = async () => {} } = userContextValue
     let [title,setTitle] = useState("")
     let [description,setDescription]=useState("")
     let [frontEndImage1,setFrontEndImage1]=useState(null)
@@ -64,6 +65,7 @@ function ListingContext({children}) {
     let [city,setCity]=useState("")
     let [landmark,setLandmark]=useState("")
     let [category,setCategory]=useState("")
+    let [video,setVideo]=useState(null)
     let [adding,setAdding]=useState(false)
     let [updating,setUpdating]=useState(false)
     let [deleting,setDeleting]=useState(false)
@@ -413,7 +415,7 @@ function ListingContext({children}) {
         }
     ]
     const mergeListings = (items = [], { includeDemo = false } = {}) => {
-        const backendItems = Array.isArray(items) ? items.filter(Boolean) : []
+        const backendItems = Array.isArray(items) ? items.filter(Boolean).map(normalizeListingRecord) : []
         if (!includeDemo) {
             return backendItems
         }
@@ -440,13 +442,14 @@ function ListingContext({children}) {
     }
 
     const persistLocalListing = (listing) => {
+        const normalizedListing = normalizeListingRecord(listing)
         const currentLocalListings = getStoredLocalListings()
-        const nextLocalListings = [listing, ...currentLocalListings.filter((item) => String(item?._id) !== String(listing?._id))]
+        const nextLocalListings = [normalizedListing, ...currentLocalListings.filter((item) => String(item?._id) !== String(normalizedListing?._id))]
         localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(nextLocalListings))
-        setListingData((prev) => [listing, ...(prev || []).filter((item) => String(item?._id) !== String(listing?._id))])
-        setNewListData((prev) => [listing, ...(prev || []).filter((item) => String(item?._id) !== String(listing?._id))])
+        setListingData((prev) => [normalizedListing, ...(prev || []).filter((item) => String(item?._id) !== String(normalizedListing?._id))])
+        setNewListData((prev) => [normalizedListing, ...(prev || []).filter((item) => String(item?._id) !== String(normalizedListing?._id))])
         const nextUser = userData && typeof userData === "object"
-            ? { ...userData, listing: [listing, ...(((userData.listing) || []).filter((item) => String(item?._id) !== String(listing?._id)))] }
+            ? { ...userData, listing: [normalizedListing, ...(((userData.listing) || []).filter((item) => String(item?._id) !== String(normalizedListing?._id)))] }
             : null
         if (nextUser) {
             setUserData(nextUser)
@@ -492,6 +495,7 @@ function ListingContext({children}) {
         setCity("")
         setLandmark("")
         setCategory("")
+        setVideo(null)
     }
 
     const getFallbackImagesForCategory = (selectedCategory) => {
@@ -522,7 +526,12 @@ function ListingContext({children}) {
                 rent,
                 city,
                 landMark: landmark,
-                category
+                category: resolveListingCategory({
+                    category,
+                    image1: backEndImage1,
+                    image2: backEndImage2,
+                    image3: backEndImage3
+                })
             }
 
         let result
@@ -541,7 +550,7 @@ function ListingContext({children}) {
                 toast.info("Listing added with fallback images.")
             } catch (fallbackError) {
                 const [fallbackImage1, fallbackImage2, fallbackImage3] = getFallbackImagesForCategory(category)
-                const localListing = {
+                const localListing = normalizeListingRecord({
                     _id: `local-${Date.now()}`,
                     title,
                     description,
@@ -558,7 +567,7 @@ function ListingContext({children}) {
                     isBooked: false,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
-                }
+                })
                 persistLocalListing(localListing)
                 setAdding(false)
                 navigate("/")
@@ -570,6 +579,7 @@ function ListingContext({children}) {
         setAdding(false)
         console.log(result)
         await getListing()
+        await getCurrentUser()
         navigate("/")
         toast.success("AddListing Successfully")
         resetListingForm()
@@ -583,14 +593,14 @@ function ListingContext({children}) {
      }
      const handleViewCard = async (id, preloadedListing = null) => {
         if (preloadedListing && typeof preloadedListing === "object") {
-            setCardDetails(preloadedListing)
+            setCardDetails(normalizeListingRecord(preloadedListing))
             navigate("/viewcard")
             return
         }
         try {
             let result = await axios.get( serverUrl + `/api/listing/findlistingbyid/${id}`,{withCredentials:true})
             console.log(result.data)
-            setCardDetails(result.data)
+            setCardDetails(normalizeListingRecord(result.data))
             navigate("/viewcard")
         } catch (error) {
             console.log(error)
@@ -613,7 +623,7 @@ function ListingContext({children}) {
             let result = await axios.get(serverUrl + "/api/listing/search", {
                 params: { query: data }
             })
-            const items = Array.isArray(result.data) ? result.data : []
+            const items = Array.isArray(result.data) ? result.data.map(normalizeListingRecord) : []
             setSearchData(items)
             return items
         } catch (error) {
@@ -681,6 +691,7 @@ function ListingContext({children}) {
         city,setCity,
         landmark,setLandmark,
         category,setCategory,
+        video,setVideo,
         handleAddListing,
         setAdding,adding,
         listingData,setListingData,

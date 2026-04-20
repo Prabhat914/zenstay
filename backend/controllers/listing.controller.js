@@ -1,6 +1,7 @@
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Listing from "../model/listing.model.js";
 import User from "../model/user.model.js";
+import { resolveListingCategory } from "../utils/listingCategory.js";
 
 const listingImageFallbacks = {
     villa: [
@@ -72,8 +73,8 @@ export const addListing = async (req,res) => {
     try {
         let host = req.userId;
         let {title,description,rent,city,country,landMark,category} = req.body
-        if (!String(title || "").trim() || !String(description || "").trim() || !String(city || "").trim() || !String(landMark || "").trim() || !String(category || "").trim()) {
-            return res.status(400).json({ message: "Title, description, city, landmark, and category are required" })
+        if (!String(title || "").trim() || !String(description || "").trim() || !String(city || "").trim() || !String(landMark || "").trim()) {
+            return res.status(400).json({ message: "Title, description, city, and landmark are required" })
         }
         if (!Number.isFinite(Number(rent)) || Number(rent) <= 0) {
             return res.status(400).json({ message: "Rent must be a valid positive number" })
@@ -86,6 +87,11 @@ export const addListing = async (req,res) => {
 
         if (!image1 || !image2 || !image3) {
             return res.status(400).json({ message: "At least 3 images are mandatory for listing" })
+        }
+
+        const resolvedCategory = resolveListingCategory({ category, image1, image2, image3 })
+        if (!resolvedCategory) {
+            return res.status(400).json({ message: "A supported listing category is required" })
         }
 
         // Video Upload or Auto-Reel Generation
@@ -105,7 +111,7 @@ export const addListing = async (req,res) => {
             city,
             country,
             landMark,
-            category,
+            category: resolvedCategory,
             image1,
             image2,
             image3,
@@ -168,17 +174,20 @@ export const updateListing = async (req,res) => {
         listing.city = String(city || listing.city).trim()
         listing.country = String(country ?? listing.country).trim()
         listing.landMark = String(landMark || listing.landMark).trim()
-        listing.category = String(category || listing.category).trim()
+        const nextImage1 = req.body?.image1 || req.files?.image1 ? await resolveListingImage(req, "image1") : listing.image1
+        const nextImage2 = req.body?.image2 || req.files?.image2 ? await resolveListingImage(req, "image2") : listing.image2
+        const nextImage3 = req.body?.image3 || req.files?.image3 ? await resolveListingImage(req, "image3") : listing.image3
 
-        if(req.body?.image1 || req.files?.image1){
-            listing.image1 = await resolveListingImage(req, "image1")
-        }
-        if(req.body?.image2 || req.files?.image2){
-            listing.image2 = await resolveListingImage(req, "image2")
-        }
-        if(req.body?.image3 || req.files?.image3){
-            listing.image3 = await resolveListingImage(req, "image3")
-        }
+        listing.category = resolveListingCategory({
+            category: category || listing.category,
+            image1: nextImage1,
+            image2: nextImage2,
+            image3: nextImage3
+        })
+
+        listing.image1 = nextImage1
+        listing.image2 = nextImage2
+        listing.image3 = nextImage3
         
         if(req.body?.video || req.files?.video){
             listing.video = await resolveListingImage(req, "video")
@@ -190,7 +199,7 @@ export const updateListing = async (req,res) => {
         }
 
         if (!listing.title || !listing.description || !listing.city || !listing.landMark || !listing.category) {
-            return res.status(400).json({ message: "Title, description, city, landmark, and category are required" })
+            return res.status(400).json({ message: "Title, description, city, landmark, and a supported category are required" })
         }
         if (!Number.isFinite(Number(listing.rent)) || Number(listing.rent) <= 0) {
             return res.status(400).json({ message: "Rent must be a valid positive number" })
