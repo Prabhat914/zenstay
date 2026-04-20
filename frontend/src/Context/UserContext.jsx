@@ -18,14 +18,16 @@ const getStoredUser = () => {
 function UserContext({children}) {
      let {serverUrl,authToken,clearAuthSession} = useContext(authDataContext)
      let [userData,setUserData] = useState(() => getStoredUser())
+     const hasStoredToken = Boolean(localStorage.getItem("zenstay_token") || authToken)
      const buildAuthConfig = () => {
         const token = localStorage.getItem("zenstay_token") || authToken
         const headers = token ? { Authorization: `Bearer ${token}` } : {}
         return { withCredentials: true, headers }
      }
      const storedUser = getStoredUser()
-     const resolvedUser = userData && typeof userData === "object" && userData._id ? userData : storedUser
-     const isAuthenticated = Boolean(resolvedUser?._id || localStorage.getItem("zenstay_token") || authToken)
+     const candidateUser = userData && typeof userData === "object" && userData._id ? userData : storedUser
+     const resolvedUser = hasStoredToken ? candidateUser : null
+     const isAuthenticated = hasStoredToken && Boolean(resolvedUser?._id)
      
 
      const getCurrentUser = async () => {
@@ -52,7 +54,6 @@ function UserContext({children}) {
                 setUserData(null)
                 return
             }
-            // Keep existing local session on transient API/cookie issues.
             if (!hasToken) {
                 setUserData(null)
                 localStorage.removeItem("zenstay_user")
@@ -66,12 +67,14 @@ function UserContext({children}) {
         },[serverUrl,authToken])
 
         useEffect(() => {
+            if (!localStorage.getItem("zenstay_token") && !authToken) {
+                setUserData(null)
+                localStorage.removeItem("zenstay_user")
+                return
+            }
             if (userData && typeof userData === "object" && userData._id) {
                 localStorage.setItem("zenstay_user", JSON.stringify(userData))
                 return
-            }
-            if (!localStorage.getItem("zenstay_token") && !authToken) {
-                localStorage.removeItem("zenstay_user")
             }
         }, [userData, authToken])
 
