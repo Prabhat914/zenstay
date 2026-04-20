@@ -51,6 +51,15 @@ function ChatPanel({ cardDetails, userData, serverUrl, buildAuthConfig, isLocalL
     })
   }
 
+  const joinCurrentThread = () => {
+    const socket = socketRef.current
+    if (!socket?.connected || !listingId) return
+    socket.emit("chat:join-thread", {
+      listingId,
+      guestId: isHost ? activeGuestId : undefined
+    }, () => {})
+  }
+
   const activeThreadLabel = useMemo(() => {
     if (!isHost) {
       return cardDetails?.hostName || "Host"
@@ -162,7 +171,7 @@ function ChatPanel({ cardDetails, userData, serverUrl, buildAuthConfig, isLocalL
     socketRef.current = socket
 
     socket.on("connect", () => {
-      socket.emit("chat:join-thread", { listingId, guestId: isHost ? activeGuestId : undefined }, () => {})
+      joinCurrentThread()
     })
 
     socket.on("chat:message", (payload) => {
@@ -213,6 +222,12 @@ function ChatPanel({ cardDetails, userData, serverUrl, buildAuthConfig, isLocalL
   }, [listingId, userData?._id, isLocalListing, isHost, activeGuestId])
 
   useEffect(() => {
+    if (!userData?._id || !listingId || isLocalListing) return
+    if (isHost && !activeGuestId) return
+    joinCurrentThread()
+  }, [listingId, userData?._id, isLocalListing, isHost, activeGuestId])
+
+  useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight
     }
@@ -239,6 +254,7 @@ function ChatPanel({ cardDetails, userData, serverUrl, buildAuthConfig, isLocalL
               reject(new Error(response?.message || "Unable to send message"))
               return
             }
+            appendMessage(response.message)
             resolve(response.message)
           })
         })

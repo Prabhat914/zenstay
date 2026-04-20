@@ -11,7 +11,7 @@ function BookingContext({children}) {
     let [checkOut,setCheckOut]=useState(null) // Store as Date object or null
     let [total,setTotal]=useState(0)
     let [night,setNight]=useState(0)
-    let {serverUrl} = useContext(authDataContext)
+    let {serverUrl, authToken, clearAuthSession} = useContext(authDataContext)
     const userContextValue = useContext(userDataContext) || {}
     const listingContextValue = useContext(listingDataContext) || {}
     let {getCurrentUser = async () => {}, userData = null} = userContextValue
@@ -21,9 +21,19 @@ function BookingContext({children}) {
     let [booking,setbooking]= useState(false)
     let navigate = useNavigate()
     const buildAuthConfig = () => {
-        const token = localStorage.getItem("zenstay_token") || ""
+        const token = localStorage.getItem("zenstay_token") || authToken || ""
         const headers = token ? { Authorization: `Bearer ${token}` } : {}
         return { withCredentials: true, headers }
+    }
+
+    const handleAuthFailure = (error) => {
+        if (error?.response?.status === 401) {
+            clearAuthSession()
+            navigate("/login")
+            toast.error("Session expired. Please login again to continue booking.")
+            return true
+        }
+        return false
     }
 
     const loadRazorpayScript = () => {
@@ -105,6 +115,9 @@ function BookingContext({children}) {
             console.log(error)
             setbooking(false)
             setBookingData(null)
+            if (handleAuthFailure(error)) {
+                return
+            }
             toast.error(error?.response?.data?.message || "Payment/booking failed")
 
 
@@ -123,6 +136,9 @@ function BookingContext({children}) {
             
         } catch (error) {
             console.log(error)
+            if (handleAuthFailure(error)) {
+                return
+            }
             toast.error(error.response.data.message)
         }
         
@@ -134,6 +150,9 @@ function BookingContext({children}) {
             setMyBookings(result.data || [])
         } catch (error) {
             console.log(error)
+            if (handleAuthFailure(error)) {
+                return
+            }
             setMyBookings([])
         }
     }
@@ -147,6 +166,9 @@ function BookingContext({children}) {
             toast.success("Booking cancelled")
         } catch (error) {
             console.log(error)
+            if (handleAuthFailure(error)) {
+                return
+            }
             toast.error(error?.response?.data?.message || "Cancel failed")
         }
     }
@@ -165,6 +187,9 @@ function BookingContext({children}) {
             return result.data
         } catch (error) {
             console.log(error)
+            if (handleAuthFailure(error)) {
+                throw error
+            }
             toast.error(error?.response?.data?.message || "Update failed")
             throw error
         }

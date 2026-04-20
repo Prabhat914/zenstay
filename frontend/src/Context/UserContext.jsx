@@ -16,7 +16,7 @@ const getStoredUser = () => {
 }
 
 function UserContext({children}) {
-     let {serverUrl,authToken} = useContext(authDataContext)
+     let {serverUrl,authToken,clearAuthSession} = useContext(authDataContext)
      let [userData,setUserData] = useState(() => getStoredUser())
      const buildAuthConfig = () => {
         const token = localStorage.getItem("zenstay_token") || authToken
@@ -46,8 +46,13 @@ function UserContext({children}) {
             }
         } catch (error) {
             console.log(error)
-            // Keep existing local session on transient API/cookie issues.
             const hasToken = Boolean(localStorage.getItem("zenstay_token") || authToken)
+            if (error?.response?.status === 401 && hasToken) {
+                clearAuthSession()
+                setUserData(null)
+                return
+            }
+            // Keep existing local session on transient API/cookie issues.
             if (!hasToken) {
                 setUserData(null)
                 localStorage.removeItem("zenstay_user")
@@ -65,10 +70,10 @@ function UserContext({children}) {
                 localStorage.setItem("zenstay_user", JSON.stringify(userData))
                 return
             }
-            if (!localStorage.getItem("zenstay_token")) {
+            if (!localStorage.getItem("zenstay_token") && !authToken) {
                 localStorage.removeItem("zenstay_user")
             }
-        }, [userData])
+        }, [userData, authToken])
 
     let value={
         userData: resolvedUser,

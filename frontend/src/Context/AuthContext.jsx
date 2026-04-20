@@ -9,6 +9,13 @@ function AuthContext({children}) {
     let [loading,setLoading]=useState(false)
     const [authToken, setAuthToken] = useState(() => localStorage.getItem("zenstay_token") || "")
 
+    const clearAuthSession = () => {
+        setAuthToken("")
+        localStorage.removeItem("zenstay_token")
+        localStorage.removeItem("zenstay_user")
+        delete axios.defaults.headers.common.Authorization
+    }
+
     useEffect(() => {
         if (authToken) {
             localStorage.setItem("zenstay_token", authToken)
@@ -22,7 +29,8 @@ function AuthContext({children}) {
     let value={
         serverUrl,
         loading,setLoading,
-        authToken,setAuthToken
+        authToken,setAuthToken,
+        clearAuthSession
     }
   return (
     <div>

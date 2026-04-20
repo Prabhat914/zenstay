@@ -92,7 +92,9 @@ function ViewCard() {
         setCategory(cardDetails.category)
     }, [cardDetails])
 
-    const isLocalListing = String(cardDetails?._id || "").startsWith("local-")
+    const listingId = String(cardDetails?._id || "")
+    const isLocalListing = listingId.startsWith("local-") || listingId.startsWith("demo-")
+    const isDemoListing = listingId.startsWith("demo-")
 
     const saveLocalListingDetails = (nextListing) => {
         syncLocalListing(nextListing)
@@ -272,6 +274,11 @@ function ViewCard() {
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px]'>{`${cardDetails.title.toUpperCase()} ${cardDetails.category.toUpperCase()} , ${cardDetails.landMark.toUpperCase()}`}</div>
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px] text-gray-800'>{cardDetails.description}</div>
              <div className='w-[95%] flex items-start justify-start text-[18px] md:w-[80%] md:text-[25px]'>{`Rs.${cardDetails.rent}/day`}</div>
+             {isDemoListing && (
+                <div className='w-[95%] md:w-[80%] rounded-lg border border-[#f1d5ae] bg-[#fff8ec] px-[16px] py-[12px] text-[14px] text-[#7a5830]'>
+                    This is a demo listing preview. Real booking and live chat are available on backend listings only.
+                </div>
+             )}
              
              {/* Map Section */}
              {cardDetails.mapUrl && (
@@ -332,7 +339,7 @@ function ViewCard() {
              {cardDetails.host == userData?._id && <button className='px-[30px] py-[10px] bg-black text-[white] text-[18px] md:px-[100px] rounded-lg text-nowrap' onClick={handleDeleteListing} disabled={deleting}>
                 {deleting ? "Deleting..." : "Delete listing"}
              </button>}
-             {cardDetails.host != userData?._id && <button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg   text-nowrap' onClick={()=>setBookingPopUp(prev => !prev)}> 
+             {!isDemoListing && cardDetails.host != userData?._id && <button className='px-[30px] py-[10px] bg-[red] text-[white] text-[18px] md:px-[100px] rounded-lg   text-nowrap' onClick={()=>setBookingPopUp(prev => !prev)}> 
                 Reserve
              </button>}
              </div>

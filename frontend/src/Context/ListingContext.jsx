@@ -419,9 +419,9 @@ function ListingContext({children}) {
         return [...backendItems, ...missingDemoItems]
     }
 
-    let {serverUrl} = useContext(authDataContext)
+    let {serverUrl, authToken} = useContext(authDataContext)
     const buildAuthConfig = () => {
-        const token = localStorage.getItem("zenstay_token") || ""
+        const token = localStorage.getItem("zenstay_token") || authToken || ""
         const headers = token ? { Authorization: `Bearer ${token}` } : {}
         return { withCredentials: true, headers }
     }
