@@ -9,7 +9,6 @@ import { normalizeListingRecord, resolveListingCategory } from '../utils/listing
 
 export const listingDataContext = createContext()
 const MAX_LISTING_UPLOAD_SIZE = 1600 * 1024
-const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 
 const listingImageFallbacks = {
     villa: ["/villas/OIP.jpeg", "/villas/OIP (1).jpeg", "/villas/OIP (2).jpeg"],
@@ -431,52 +430,18 @@ function ListingContext({children}) {
         return { withCredentials: true, headers }
     }
 
-    const getStoredLocalListings = () => {
-        try {
-            const raw = localStorage.getItem(LOCAL_LISTINGS_KEY)
-            const parsed = JSON.parse(raw || "[]")
-            return Array.isArray(parsed) ? parsed : []
-        } catch {
-            return []
-        }
-    }
-
-    const persistLocalListing = (listing) => {
+    const syncLocalListing = (listing) => {
         const normalizedListing = normalizeListingRecord(listing)
-        const currentLocalListings = getStoredLocalListings()
-        const nextLocalListings = [normalizedListing, ...currentLocalListings.filter((item) => String(item?._id) !== String(normalizedListing?._id))]
-        localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(nextLocalListings))
         setListingData((prev) => [normalizedListing, ...(prev || []).filter((item) => String(item?._id) !== String(normalizedListing?._id))])
         setNewListData((prev) => [normalizedListing, ...(prev || []).filter((item) => String(item?._id) !== String(normalizedListing?._id))])
-        const nextUser = userData && typeof userData === "object"
-            ? { ...userData, listing: [normalizedListing, ...(((userData.listing) || []).filter((item) => String(item?._id) !== String(normalizedListing?._id)))] }
-            : null
-        if (nextUser) {
-            setUserData(nextUser)
-            localStorage.setItem("zenstay_user", JSON.stringify(nextUser))
-        }
-    }
-
-    const syncLocalListing = (listing) => {
-        persistLocalListing(listing)
-        if (String(cardDetails?._id) === String(listing?._id)) {
-            setCardDetails(listing)
+        if (String(cardDetails?._id) === String(normalizedListing?._id)) {
+            setCardDetails(normalizedListing)
         }
     }
 
     const deleteLocalListing = (listingId) => {
-        const nextLocalListings = getStoredLocalListings().filter((item) => String(item?._id) !== String(listingId))
-        localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(nextLocalListings))
         setListingData((prev) => (prev || []).filter((item) => String(item?._id) !== String(listingId)))
         setNewListData((prev) => (prev || []).filter((item) => String(item?._id) !== String(listingId)))
-        if (userData && typeof userData === "object") {
-            const nextUser = {
-                ...userData,
-                listing: ((userData.listing) || []).filter((item) => String(item?._id) !== String(listingId))
-            }
-            setUserData(nextUser)
-            localStorage.setItem("zenstay_user", JSON.stringify(nextUser))
-        }
         if (String(cardDetails?._id) === String(listingId)) {
             setCardDetails(null)
         }
@@ -549,31 +514,8 @@ function ListingContext({children}) {
                 result = await axios.post(serverUrl + "/api/listing/add", fallbackPayload, buildAuthConfig())
                 toast.info("Listing added with fallback images.")
             } catch (fallbackError) {
-                const [fallbackImage1, fallbackImage2, fallbackImage3] = getFallbackImagesForCategory(category)
-                const localListing = normalizeListingRecord({
-                    _id: `local-${Date.now()}`,
-                    title,
-                    description,
-                    rent: Number(rent || 0),
-                    city,
-                    country: "",
-                    landMark: landmark,
-                    category,
-                    image1: fallbackImage1,
-                    image2: fallbackImage2,
-                    image3: fallbackImage3,
-                    host: userData?._id || "local-user",
-                    ratings: 0,
-                    isBooked: false,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                })
-                persistLocalListing(localListing)
                 setAdding(false)
-                navigate("/")
-                toast.success("Listing saved locally.")
-                resetListingForm()
-                return
+                throw fallbackError
             }
         }
         setAdding(false)
@@ -637,12 +579,11 @@ function ListingContext({children}) {
 
      const getListing = async () => {
         setListingsLoading(true)
-        const localListings = getStoredLocalListings()
         try {
             let result = await axios.get( serverUrl + "/api/listing/get",{withCredentials:true, timeout: 6000})
             const items = Array.isArray(result.data) ? result.data : []
             if (items.length === 0) {
-                const mergedEmptyItems = mergeListings(localListings, { includeDemo: true })
+                const mergedEmptyItems = mergeListings([], { includeDemo: true })
                 setListingData(mergedEmptyItems)
                 setNewListData(mergedEmptyItems)
                 if (!didShowFallbackToast.current) {
@@ -652,7 +593,7 @@ function ListingContext({children}) {
                 setListingsLoading(false)
                 return
             }
-            const mergedItems = mergeListings([...(localListings || []), ...items], { includeDemo: false })
+            const mergedItems = mergeListings(items, { includeDemo: false })
             setListingData(mergedItems)
             setNewListData(mergedItems)
             didShowFallbackToast.current = false
@@ -660,7 +601,7 @@ function ListingContext({children}) {
 
         } catch (error) {
             console.log(error)
-            const mergedFallbackItems = mergeListings(localListings, { includeDemo: true })
+            const mergedFallbackItems = mergeListings([], { includeDemo: true })
             setListingData(mergedFallbackItems)
             setNewListData(mergedFallbackItems)
             if (!didShowFallbackToast.current) {
