@@ -412,8 +412,11 @@ function ListingContext({children}) {
             isTrending: true
         }
     ]
-    const mergeListings = (items = []) => {
+    const mergeListings = (items = [], { includeDemo = false } = {}) => {
         const backendItems = Array.isArray(items) ? items.filter(Boolean) : []
+        if (!includeDemo) {
+            return backendItems
+        }
         const seenIds = new Set(backendItems.map((item) => String(item?._id || "")))
         const missingDemoItems = demoListings.filter((item) => !seenIds.has(String(item?._id || "")))
         return [...backendItems, ...missingDemoItems]
@@ -629,7 +632,7 @@ function ListingContext({children}) {
             let result = await axios.get( serverUrl + "/api/listing/get",{withCredentials:true, timeout: 6000})
             const items = Array.isArray(result.data) ? result.data : []
             if (items.length === 0) {
-                const mergedEmptyItems = mergeListings(localListings)
+                const mergedEmptyItems = mergeListings(localListings, { includeDemo: true })
                 setListingData(mergedEmptyItems)
                 setNewListData(mergedEmptyItems)
                 if (!didShowFallbackToast.current) {
@@ -639,7 +642,7 @@ function ListingContext({children}) {
                 setListingsLoading(false)
                 return
             }
-            const mergedItems = mergeListings([...(localListings || []), ...items])
+            const mergedItems = mergeListings([...(localListings || []), ...items], { includeDemo: false })
             setListingData(mergedItems)
             setNewListData(mergedItems)
             didShowFallbackToast.current = false
@@ -647,7 +650,7 @@ function ListingContext({children}) {
 
         } catch (error) {
             console.log(error)
-            const mergedFallbackItems = mergeListings(localListings)
+            const mergedFallbackItems = mergeListings(localListings, { includeDemo: true })
             setListingData(mergedFallbackItems)
             setNewListData(mergedFallbackItems)
             if (!didShowFallbackToast.current) {
