@@ -3,7 +3,7 @@ import React, { createContext, useEffect, useState } from 'react'
 export const authDataContext = createContext()
 function AuthContext({children}) {
     const normalizeUrl = (value) => String(value || "").trim().replace(/\/+$/, "")
-    const prodApiUrl = normalizeUrl(import.meta.env.VITE_API_URL) || "https://backend-gray-ten-66.vercel.app"
+    const prodApiUrl = normalizeUrl(import.meta.env.VITE_API_URL) || "https://zenstay-backend.vercel.app"
     const devApiUrl = normalizeUrl(import.meta.env.VITE_DEV_API_URL) || "http://localhost:8000"
     const serverUrl = import.meta.env.DEV ? devApiUrl : prodApiUrl
 
