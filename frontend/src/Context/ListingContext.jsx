@@ -534,25 +534,26 @@ function ListingContext({children}) {
         
      }
      const handleViewCard = async (id, preloadedListing = null) => {
+        const nextPath = `/viewcard?id=${encodeURIComponent(String(id || ""))}`
         window.scrollTo({ top: 0, left: 0, behavior: "auto" })
         document.documentElement.scrollTop = 0
         document.body.scrollTop = 0
         if (preloadedListing && typeof preloadedListing === "object") {
             setCardDetails(normalizeListingRecord(preloadedListing))
-            navigate("/viewcard")
+            navigate(nextPath)
             return
         }
         try {
             let result = await axios.get( serverUrl + `/api/listing/findlistingbyid/${id}`,{withCredentials:true})
             console.log(result.data)
             setCardDetails(normalizeListingRecord(result.data))
-            navigate("/viewcard")
+            navigate(nextPath)
         } catch (error) {
             console.log(error)
             const fallbackListing = (listingData || []).find((item) => String(item?._id) === String(id))
             if (fallbackListing) {
                 setCardDetails(fallbackListing)
-                navigate("/viewcard")
+                navigate(nextPath)
                 return
             }
             toast.error(getErrorMessage(error, "Unable to open this listing right now."))

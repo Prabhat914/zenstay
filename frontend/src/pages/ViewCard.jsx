@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listingDataContext } from '../Context/ListingContext';
 import { userDataContext } from '../Context/UserContext';
 import { RxCross2 } from "react-icons/rx";
@@ -19,6 +19,7 @@ const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 
 function ViewCard() {
     let navigate=useNavigate()
+    const [searchParams] = useSearchParams()
     const pageRef = useRef(null)
     let {cardDetails, setCardDetails, buildAuthConfig, getListing, syncLocalListing, deleteLocalListing}=useContext(listingDataContext)
     const fallbackImage = logoImage
@@ -103,14 +104,32 @@ function ViewCard() {
         setHeroImageIndex(0)
     }, [cardDetails.image1, cardDetails.image2, cardDetails.image3])
 
+    const listingId = String(cardDetails?._id || "")
+    const routeListingId = String(searchParams.get("id") || "")
+    const isLocalListing = listingId.startsWith("local-") || listingId.startsWith("demo-")
+    const isDemoListing = listingId.startsWith("demo-")
+
     useEffect(() => {
         window.scrollTo({ top: 0, left: 0, behavior: "auto" })
         pageRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" })
-    }, [cardDetails?._id])
+    }, [cardDetails?._id, routeListingId])
 
-    const listingId = String(cardDetails?._id || "")
-    const isLocalListing = listingId.startsWith("local-") || listingId.startsWith("demo-")
-    const isDemoListing = listingId.startsWith("demo-")
+    useEffect(() => {
+        if (!routeListingId || routeListingId === listingId) {
+            return
+        }
+
+        const syncFromRoute = async () => {
+            try {
+                const result = await axios.get(serverUrl + `/api/listing/findlistingbyid/${routeListingId}`, { withCredentials: true })
+                setCardDetails(normalizeListingRecord(result.data))
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        syncFromRoute()
+    }, [routeListingId, listingId, serverUrl, setCardDetails])
 
     const saveLocalListingDetails = (nextListing) => {
         syncLocalListing(nextListing)
