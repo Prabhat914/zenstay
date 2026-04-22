@@ -7,7 +7,7 @@ import { FcCancel } from "react-icons/fc";
 import { bookingDataContext } from '../Context/BookingContext';
 import logoImage from '../assets/zenstay-logo.jpeg'
 
-function Card({ title, landMark, image1, image2, image3, rent, city, country, id, ratings, isBooked, host }) {
+function Card({ title, landMark, image1, image2, image3, rent, city, country, id, ratings, isBooked, host, listingItem = null }) {
     let { userData } = useContext(userDataContext)
     let { handleViewCard } = useContext(listingDataContext)
     let [popUp, setPopUp] = useState(false)
@@ -39,7 +39,20 @@ function Card({ title, landMark, image1, image2, image3, rent, city, country, id
         e.currentTarget.src = fallbackImage
     }
     const handleClick = () => {
-        handleViewCard(id)
+        handleViewCard(id, listingItem || {
+            _id: id,
+            title,
+            landMark,
+            image1,
+            image2,
+            image3,
+            rent,
+            city,
+            country,
+            ratings,
+            isBooked,
+            host
+        })
     }
     return (
         <div className='group w-full h-[460px] flex items-start justify-start flex-col rounded-[28px] cursor-pointer relative z-[10] border border-[#dde6e7] bg-white/92 backdrop-blur-sm overflow-hidden transition duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_22px_50px_rgba(15,23,42,0.14)]' onClick={() => !isBooked ? handleClick() : null}>
