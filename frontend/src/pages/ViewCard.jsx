@@ -160,6 +160,21 @@ function ViewCard() {
         />
     )
 
+    const renderThumbnail = (imageSrc, index, roundedClass = "") => (
+        <button
+            type="button"
+            className={`w-full h-full overflow-hidden flex items-center justify-center border-[2px] bg-[#eef4f4] cursor-pointer transition duration-200 ${heroImageIndex === index ? "ring-2 ring-[#123b3d]" : ""} ${roundedClass}`}
+            onClick={() => setHeroImageIndex(index)}
+        >
+            <img
+                src={imageSrc || fallbackImage}
+                onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}}
+                alt={`${cardDetails.title || "Listing"} view ${index + 1}`}
+                className='w-full h-full object-cover'
+            />
+        </button>
+    )
+
    
 
    
@@ -312,11 +327,11 @@ function ViewCard() {
                     {renderPrimaryImage()}
                 </div>
                 <div className='w-full h-[220px] flex items-center justify-center md:w-[30%] md:h-full md:flex-col'>
-                    <div className='w-full h-1/2 overflow-hidden flex items-center justify-center border-[2px] bg-[#eef4f4] md:h-1/2'>
-                    <img src={cardDetails.image2 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-full h-full object-cover' />
+                    <div className='w-full h-1/2'>
+                    {renderThumbnail(cardDetails.image2, 1)}
                     </div>
-                    <div className='w-full h-1/2 overflow-hidden flex items-center justify-center border-[2px] bg-[#eef4f4] rounded-b-[18px] md:rounded-none md:rounded-r-[18px] md:h-1/2'>
-                    <img src={cardDetails.image3 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-full h-full object-cover' />
+                    <div className='w-full h-1/2'>
+                    {renderThumbnail(cardDetails.image3, 2, 'rounded-b-[18px] md:rounded-none md:rounded-r-[18px]')}
                     </div>
                 </div>
                
