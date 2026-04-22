@@ -1,5 +1,5 @@
-import React, { useContext } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import React, { useContext, useEffect } from 'react'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 
 import { ToastContainer } from 'react-toastify';
@@ -28,12 +28,28 @@ const ProtectedRoute = ({ isAuthenticated, children, adminOnly = false }) => {
   return children;
 };
 
+const ScrollToTop = () => {
+  const location = useLocation()
+
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual"
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" })
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+  }, [location.pathname, location.search])
+
+  return null
+}
+
 function App() {
   let {isAuthenticated} = useContext(userDataContext)
  
   return (
     <>
     <ToastContainer />
+    <ScrollToTop />
     <Routes>
       <Route path='/' element={<Home/>}/>
       <Route path='/login' element={<Login/>}/>

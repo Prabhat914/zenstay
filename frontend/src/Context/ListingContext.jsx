@@ -534,6 +534,9 @@ function ListingContext({children}) {
         
      }
      const handleViewCard = async (id, preloadedListing = null) => {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" })
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
         if (preloadedListing && typeof preloadedListing === "object") {
             setCardDetails(normalizeListingRecord(preloadedListing))
             navigate("/viewcard")
