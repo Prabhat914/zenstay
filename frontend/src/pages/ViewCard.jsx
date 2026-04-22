@@ -13,7 +13,6 @@ import logoImage from '../assets/zenstay-logo.jpeg'
 import ChatPanel from '../Component/ChatPanel';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import ReelPlayer from '../Component/ReelPlayer';
 import { categoryOptions, normalizeListingCategory, normalizeListingRecord } from '../utils/listingCategory';
 
 const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
@@ -267,11 +266,7 @@ function ViewCard() {
     
              <div className='w-[95%] h-[400px] flex items-center justify-center flex-col md:w-[80%] md:flex-row '>
                 <div className='w-[100%]  h-[65%]  md:w-[70%] md:h-[100%] overflow-hidden flex items-center justify-center border-[2px] border-[white] '>
-                    {cardDetails.reel || cardDetails.video ? (
-                        <ReelPlayer url={cardDetails.reel || cardDetails.video} fallback={renderPrimaryImage()} />
-                    ) : (
-                        renderPrimaryImage()
-                    )}
+                    {renderPrimaryImage()}
                 </div>
                 <div className='w-[100%] h-[50%]  flex  items-center justify-center md:w-[50%] md:h-[100%] md:flex-col '>
                     <div className='w-[100%] h-[100%]  overflow-hidden  flex items-center justify-center border-[2px] '>
