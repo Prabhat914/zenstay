@@ -14,7 +14,7 @@ import ChatPanel from '../Component/ChatPanel';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import ReelPlayer from '../Component/ReelPlayer';
-import { categoryOptions, normalizeListingCategory } from '../utils/listingCategory';
+import { categoryOptions, normalizeListingCategory, normalizeListingRecord } from '../utils/listingCategory';
 
 const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 
@@ -103,9 +103,19 @@ function ViewCard() {
 
     const refreshListingDetails = async () => {
         const result = await axios.get(serverUrl + `/api/listing/findlistingbyid/${cardDetails._id}`, { withCredentials: true })
-        setCardDetails(result.data)
-        return result.data
+        const normalizedListing = normalizeListingRecord(result.data)
+        setCardDetails(normalizedListing)
+        return normalizedListing
     }
+
+    const renderPrimaryImage = () => (
+        <img
+            src={cardDetails.image1 || fallbackImage}
+            onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}}
+            alt={cardDetails.title || "Listing"}
+            className='w-[100%] h-[100%] object-cover'
+        />
+    )
 
    
 
@@ -257,9 +267,9 @@ function ViewCard() {
              <div className='w-[95%] h-[400px] flex items-center justify-center flex-col md:w-[80%] md:flex-row '>
                 <div className='w-[100%]  h-[65%]  md:w-[70%] md:h-[100%] overflow-hidden flex items-center justify-center border-[2px] border-[white] '>
                     {cardDetails.reel || cardDetails.video ? (
-                        <ReelPlayer url={cardDetails.reel || cardDetails.video} />
+                        <ReelPlayer url={cardDetails.reel || cardDetails.video} fallback={renderPrimaryImage()} />
                     ) : (
-                        <img src={cardDetails.image1 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-[100%]' />
+                        renderPrimaryImage()
                     )}
                 </div>
                 <div className='w-[100%] h-[50%]  flex  items-center justify-center md:w-[50%] md:h-[100%] md:flex-col '>
