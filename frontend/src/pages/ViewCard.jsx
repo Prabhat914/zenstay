@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom';
 import { listingDataContext } from '../Context/ListingContext';
@@ -57,6 +57,11 @@ function ViewCard() {
         let {deleting,setDeleting} = useContext(listingDataContext)
         let [minDate,setMinDate] = useState("")
         const comments = Array.isArray(cardDetails.comments) ? cardDetails.comments : []
+        const listingImages = useMemo(
+            () => [cardDetails.image1, cardDetails.image2, cardDetails.image3].filter(Boolean),
+            [cardDetails.image1, cardDetails.image2, cardDetails.image3]
+        )
+        const [heroImageIndex, setHeroImageIndex] = useState(0)
 
         let {checkIn,setCheckIn,
             checkOut,setCheckOut,
@@ -93,6 +98,10 @@ function ViewCard() {
         setCategory(normalizeListingCategory(cardDetails.category) || "rooms")
     }, [cardDetails])
 
+    useEffect(() => {
+        setHeroImageIndex(0)
+    }, [cardDetails.image1, cardDetails.image2, cardDetails.image3])
+
     const listingId = String(cardDetails?._id || "")
     const isLocalListing = listingId.startsWith("local-") || listingId.startsWith("demo-")
     const isDemoListing = listingId.startsWith("demo-")
@@ -108,10 +117,19 @@ function ViewCard() {
         return normalizedListing
     }
 
+    const handleHeroImageError = (e) => {
+        if (heroImageIndex < listingImages.length - 1) {
+            setHeroImageIndex((prev) => prev + 1)
+            return
+        }
+        e.currentTarget.onerror = null
+        e.currentTarget.src = fallbackImage
+    }
+
     const renderPrimaryImage = () => (
         <img
-            src={cardDetails.image1 || fallbackImage}
-            onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}}
+            src={listingImages[heroImageIndex] || fallbackImage}
+            onError={handleHeroImageError}
             alt={cardDetails.title || "Listing"}
             className='w-[100%] h-[100%] object-cover'
         />
