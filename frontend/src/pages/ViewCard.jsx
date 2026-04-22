@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom';
 import { listingDataContext } from '../Context/ListingContext';
@@ -19,6 +19,7 @@ const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 
 function ViewCard() {
     let navigate=useNavigate()
+    const pageRef = useRef(null)
     let {cardDetails, setCardDetails, buildAuthConfig, getListing, syncLocalListing, deleteLocalListing}=useContext(listingDataContext)
     const fallbackImage = logoImage
     const fallbackCard = {
@@ -101,6 +102,11 @@ function ViewCard() {
     useEffect(() => {
         setHeroImageIndex(0)
     }, [cardDetails.image1, cardDetails.image2, cardDetails.image3])
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" })
+        pageRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" })
+    }, [cardDetails?._id])
 
     const listingId = String(cardDetails?._id || "")
     const isLocalListing = listingId.startsWith("local-") || listingId.startsWith("demo-")
@@ -273,7 +279,7 @@ function ViewCard() {
         
     
   return (
-    <div className='w-[100%] h-[100vh] bg-[white] flex items-center justify-center gap-[10px] flex-col overflow-auto  relative'>
+    <div ref={pageRef} className='w-[100%] h-[100vh] bg-[white] flex items-center justify-center gap-[10px] flex-col overflow-auto  relative'>
              <div className='w-[50px] h-[50px] bg-[red] cursor-pointer absolute top-[5%] left-[20px] rounded-[50%] flex items-center justify-center' onClick={()=>navigate("/")}><FaArrowLeftLong className='w-[25px] h-[25px] text-[white]' /></div>
     
              <div className='w-[95%]  flex items-start justify-start text-[25px] md:w-[80%] mb-[10px]'>
