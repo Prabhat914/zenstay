@@ -298,25 +298,25 @@ function ViewCard() {
         
     
   return (
-    <div ref={pageRef} className='w-[100%] h-[100vh] bg-[white] flex items-center justify-center gap-[10px] flex-col overflow-auto  relative'>
-             <div className='w-[50px] h-[50px] bg-[red] cursor-pointer absolute top-[5%] left-[20px] rounded-[50%] flex items-center justify-center' onClick={()=>navigate("/")}><FaArrowLeftLong className='w-[25px] h-[25px] text-[white]' /></div>
+    <div ref={pageRef} className='w-full min-h-screen bg-white flex flex-col items-center justify-start gap-[10px] overflow-x-hidden relative py-[28px] md:py-[40px]'>
+             <div className='w-[50px] h-[50px] bg-[red] cursor-pointer fixed top-[110px] left-[20px] rounded-[50%] flex items-center justify-center z-[20] md:absolute md:top-[40px]' onClick={()=>navigate("/")}><FaArrowLeftLong className='w-[25px] h-[25px] text-[white]' /></div>
     
-             <div className='w-[95%]  flex items-start justify-start text-[25px] md:w-[80%] mb-[10px]'>
+             <div className='w-[95%] flex items-start justify-start text-[25px] md:w-[80%] mb-[10px] mt-[44px] md:mt-0'>
                 <h1 className='text-[20px]  text-[#272727] md:text-[30px] text-ellipsis text-nowrap overflow-hidden px-[70px] md:px-[0px]'>
                     {`In ${cardDetails.landMark.toUpperCase()} , ${cardDetails.city.toUpperCase()}${cardDetails.country ? `, ${String(cardDetails.country).toUpperCase()}` : ""}`}
                 </h1>
              </div>
     
-             <div className='w-[95%] h-[400px] flex items-center justify-center flex-col md:w-[80%] md:flex-row '>
-                <div className='w-[100%]  h-[65%]  md:w-[70%] md:h-[100%] overflow-hidden flex items-center justify-center border-[2px] border-[white] '>
+             <div className='w-[95%] min-h-[420px] flex items-center justify-center flex-col md:w-[80%] md:h-[420px] md:flex-row'>
+                <div className='w-full h-[280px] md:w-[70%] md:h-full overflow-hidden flex items-center justify-center border-[2px] border-white bg-[#eef4f4] rounded-t-[18px] md:rounded-none md:rounded-l-[18px]'>
                     {renderPrimaryImage()}
                 </div>
-                <div className='w-[100%] h-[50%]  flex  items-center justify-center md:w-[50%] md:h-[100%] md:flex-col '>
-                    <div className='w-[100%] h-[100%]  overflow-hidden  flex items-center justify-center border-[2px] '>
-                    <img src={cardDetails.image2 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-[100%]' />
+                <div className='w-full h-[220px] flex items-center justify-center md:w-[30%] md:h-full md:flex-col'>
+                    <div className='w-full h-1/2 overflow-hidden flex items-center justify-center border-[2px] bg-[#eef4f4] md:h-1/2'>
+                    <img src={cardDetails.image2 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-full h-full object-cover' />
                     </div>
-                    <div className='w-[100%] h-[100%]  overflow-hidden  flex items-center justify-center border-[2px] '>
-                    <img src={cardDetails.image3 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-[100%]' />
+                    <div className='w-full h-1/2 overflow-hidden flex items-center justify-center border-[2px] bg-[#eef4f4] rounded-b-[18px] md:rounded-none md:rounded-r-[18px] md:h-1/2'>
+                    <img src={cardDetails.image3 || fallbackImage} onError={(e)=>{e.currentTarget.onerror=null; e.currentTarget.src=fallbackImage}} alt="" className='w-full h-full object-cover' />
                     </div>
                 </div>
                
