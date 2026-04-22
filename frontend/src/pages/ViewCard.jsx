@@ -21,6 +21,7 @@ const LOCAL_LISTINGS_KEY = "zenstay_local_listings"
 function ViewCard() {
     let navigate=useNavigate()
     let {cardDetails, setCardDetails, buildAuthConfig, getListing, syncLocalListing, deleteLocalListing}=useContext(listingDataContext)
+    const fallbackImage = logoImage
     const fallbackCard = {
         _id: "",
         title: "Zenstay Room",

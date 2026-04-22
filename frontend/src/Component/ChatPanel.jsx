@@ -314,7 +314,21 @@ function ChatPanel({ cardDetails, userData, serverUrl, buildAuthConfig, isLocalL
   }
 
   if (!userData?._id) {
-    return null
+    return (
+      <div className='w-[95%] max-w-[1100px] md:w-[80%] mt-[18px] rounded-[30px] border border-[#dce6e6] bg-[linear-gradient(135deg,#ffffff_0%,#f3fbfb_100%)] p-[16px] md:p-[22px]'>
+        <div className='flex items-center justify-between gap-[12px] flex-wrap'>
+          <div>
+            <h2 className='text-[24px] font-semibold text-[#183335]'>Guest to Host Chat</h2>
+            <p className='text-[14px] text-[#62797b] mt-[4px]'>Ask the host anything about this stay.</p>
+          </div>
+          <div className='rounded-full bg-[#123b3d] text-white px-[14px] py-[8px] text-[13px] tracking-[0.14em] uppercase'>Login Required</div>
+        </div>
+
+        <div className='mt-[16px] rounded-[24px] border border-dashed border-[#d6e3e3] bg-white p-[18px] text-[#4c6668]'>
+          Sign in to open the guest-host chat for this listing. Once logged in, you can send messages, images, and files in real time.
+        </div>
+      </div>
+    )
   }
 
   if (isLocalListing) {
