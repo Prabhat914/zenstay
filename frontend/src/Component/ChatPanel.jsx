@@ -110,6 +110,11 @@ function ChatPanel({ cardDetails, userData, serverUrl, buildAuthConfig, isLocalL
 
   const fetchMessages = async (guestIdOverride = activeGuestId) => {
     if (!listingId || !userData?._id) return
+    if (isHost && !guestIdOverride) {
+      setMessages([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     try {
       const path = isHost && guestIdOverride
@@ -142,10 +147,23 @@ function ChatPanel({ cardDetails, userData, serverUrl, buildAuthConfig, isLocalL
     const setup = async () => {
       try {
         if (isHost) {
-          await fetchThreads()
+          const result = await axios.get(`${serverUrl}/api/chat/listing/${listingId}/threads`, buildAuthConfig())
+          const nextThreads = Array.isArray(result.data) ? result.data : []
+          if (!isMounted) return
+          setThreads(nextThreads)
+          syncHostUnreadMap(nextThreads)
+          const firstGuestId = String(nextThreads[0]?.guestId || "")
+          if (firstGuestId) {
+            setActiveGuestId(firstGuestId)
+            await fetchMessages(firstGuestId)
+          } else {
+            setMessages([])
+            setLoading(false)
+          }
+          return
         }
         if (isMounted) {
-          await fetchMessages(isHost ? activeGuestId : "")
+          await fetchMessages("")
         }
       } catch (error) {
         console.log(error)
