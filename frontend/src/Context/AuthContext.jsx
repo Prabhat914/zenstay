@@ -1,10 +1,14 @@
 import axios from 'axios'
 import React, { createContext, useEffect, useState } from 'react'
 export const authDataContext = createContext()
+
+const DEFAULT_PROD_API_URL = "https://zenstay-60a7.onrender.com"
+const DEFAULT_DEV_API_URL = "http://localhost:8000"
+
 function AuthContext({children}) {
     const normalizeUrl = (value) => String(value || "").trim().replace(/\/+$/, "")
-    const prodApiUrl = normalizeUrl(import.meta.env.VITE_API_URL) || "https://zenstay-backend.vercel.app"
-    const devApiUrl = normalizeUrl(import.meta.env.VITE_DEV_API_URL) || "http://localhost:8000"
+    const prodApiUrl = normalizeUrl(import.meta.env.VITE_API_URL) || DEFAULT_PROD_API_URL
+    const devApiUrl = normalizeUrl(import.meta.env.VITE_DEV_API_URL) || DEFAULT_DEV_API_URL
     const serverUrl = import.meta.env.DEV ? devApiUrl : prodApiUrl
 
     let [loading,setLoading]=useState(false)
