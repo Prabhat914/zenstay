@@ -2,7 +2,7 @@ import axios from 'axios'
 import React, { createContext, useEffect, useState } from 'react'
 export const authDataContext = createContext()
 
-const DEFAULT_PROD_API_URL = "https://zenstay-60a7.onrender.com"
+const DEFAULT_PROD_API_URL = "https://backend-gray-ten-66.vercel.app"
 const DEFAULT_DEV_API_URL = "http://localhost:8000"
 
 function AuthContext({children}) {
